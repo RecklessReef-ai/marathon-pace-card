@@ -132,7 +132,7 @@ test("runnerMileAt is null before the start and after the finish", () => {
 test("labels at the same mile go to opposite sides", () => {
   const pos = { 1: [0, 0], 2: [10, 0], 3: [30, 0], 4: [500, 0], 5: [520, 0] };
   const rows = assignSides([{ mile: 1, side: "l" }, { mile: 2, side: "l" }, { mile: 3, side: "r" }, { mile: 4, side: "t" }, { mile: 5, side: "t" }], m => pos[m]);
-  assert.deepEqual(rows.map(r => r.side), ["l", "r", "r", "t", "b"]);
+  assert.deepEqual(rows.map(r => r.side), ["l", "r", "t", "t", "b"]);
   const zoneMile = hotspots.find(h => h.key === "chinatown").mile;
   const st = normalizeState({ paceSec: 660, wave: 3, delay: 10, spots: [{ id: "m1", who: "Mom", mile: zoneMile }] });
   const both = computeSplits(st, ctx).filter(r => Math.abs(r.mile - zoneMile) < 0.01);

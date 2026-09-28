@@ -101,6 +101,9 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .maplegend svg { width: 18px; height: 18px; flex: none; }
 
 .toggles { display: flex; gap: 6px 18px; flex-wrap: wrap; margin: 0 0 12px; }
+.toggle.units { white-space: nowrap; flex: none; }
+.toggle select { width: auto; min-height: 38px; padding: 6px 30px 6px 10px; font-size: 0.95rem; }
+.row.minor .name { font-size: 1.15rem; }
 .toggle { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 500; }
 .toggle input { width: 20px; height: 20px; min-height: 0; accent-color: var(--sky); }
 

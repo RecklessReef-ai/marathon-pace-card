@@ -134,7 +134,7 @@ export const MAP = {
   labels: [
     ["Lake Michigan", 41.905, -87.6085, "lake"],
     ["Wrigleyville", 41.9495, -87.661, "hood"], ["Northalsted", 41.9375, -87.6575, "hood"],
-    ["Lincoln Park", 41.9235, -87.650, "hood"], ["Old Town", 41.907, -87.645, "hood"], ["River North", 41.8975, -87.6455, "hood"],
+    ["Lincoln Park", 41.9235, -87.6545, "hood"], ["Old Town", 41.907, -87.645, "hood"], ["River North", 41.8975, -87.6455, "hood"],
     ["Streeterville", 41.892, -87.6165, "hood"], ["The Loop", 41.8755, -87.6275, "hood"], ["West Loop", 41.884, -87.660, "hood"],
     ["Greektown", 41.8745, -87.652, "hood"], ["Little Italy", 41.8725, -87.664, "hood"], ["University Village", 41.8645, -87.652, "hood"],
     ["Pilsen", 41.8512, -87.6665, "hood"], ["Chinatown", 41.8445, -87.6425, "hood"], ["Bridgeport", 41.839, -87.648, "hood"],

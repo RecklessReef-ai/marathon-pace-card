@@ -211,7 +211,8 @@ export function assignSides(rows, posOf) {
     const chars = ((r.short || "") + " 00:00").length;
     const box = side => labelBox(x, y, side, chars);
     const free = side => !placed.some(p => overlaps(p, box(side)));
-    if (!free(r.side) && free(OPPOSITE[r.side])) r.side = OPPOSITE[r.side];
+    const order = [r.side, OPPOSITE[r.side], ...["l", "r", "t", "b"].filter(x => x !== r.side && x !== OPPOSITE[r.side])];
+    r.side = order.find(free) || r.side;
     placed.push(box(r.side));
   }
   return rows;
