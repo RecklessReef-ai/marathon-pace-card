@@ -1,5 +1,7 @@
 // Pure functions: no DOM, no storage. Everything here is covered by test/pace.test.js.
-import { MI, MAR_MI, SEGMENTS, WAVES, PALETTE } from "./course-data.js";
+import { MI, MAR_KM, SEGMENTS, WAVES, PALETTE } from "./course-data.js";
+
+const FIN_MI = MAR_KM / MI; // the Finish split, in miles
 
 export const DEFAULT_STATE = Object.freeze({
   v: 1, name: "", paceSec: 660, wave: 3, delay: 10, showHot: true, spots: []
@@ -172,12 +174,24 @@ export function computeSplits(state, ctx) {
   }
   for (const r of rows) { r.km = r.mile * MI; r.elapsedMin = r.mile * paceMin; r.clockMin = start + r.elapsedMin; }
   rows.sort((a, b) => (a.mile - b.mile) || (KIND_ORDER[a.kind] - KIND_ORDER[b.kind]));
+  return assignSides(rows);
+}
+
+// Two labels within 0.7 mile on the same side of the route would overlap; flip the later one.
+const OPPOSITE = { l: "r", r: "l", t: "b", b: "t" };
+export function assignSides(rows, within = 0.7) {
+  const placed = [];
+  for (const r of rows) {
+    const clash = side => placed.some(p => p.side === side && Math.abs(p.mile - r.mile) < within);
+    if (clash(r.side) && !clash(OPPOSITE[r.side])) r.side = OPPOSITE[r.side];
+    placed.push({ mile: r.mile, side: r.side });
+  }
   return rows;
 }
 
 export function finishFor(state) {
   const paceMin = state.paceSec / 60;
-  const elapsedMin = MAR_MI * paceMin;
+  const elapsedMin = FIN_MI * paceMin;
   return { elapsedMin, clockMin: startLineMinutes(state.wave, state.delay) + elapsedMin };
 }
 
@@ -185,7 +199,7 @@ export function finishFor(state) {
 export function runnerMileAt(state, nowMin) {
   const paceMin = state.paceSec / 60;
   const start = startLineMinutes(state.wave, state.delay);
-  const fin = start + MAR_MI * paceMin;
+  const fin = start + FIN_MI * paceMin;
   if (nowMin <= start || nowMin >= fin) return null;
   return (nowMin - start) / paceMin;
 }

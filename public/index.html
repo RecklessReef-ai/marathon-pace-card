@@ -4,98 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Chicago Marathon Pace Card</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --sky: #41B6E6; --star: #E4002B; --ink: #0F2340; --paper: #FFFFFF; --wash: #EAF6FC;
-    --muted: #4A5D78; --line: #C9E6F4; --field: #F6FBFE;
-    --land: #F7F9FB; --park: #DDEFD9; --water: #BFE3F4; --river: #8FCFEA; --route: #0F2340;
-    box-sizing: border-box;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --ink: #EAF3FA; --paper: #0E1A2C; --wash: #13243B; --muted: #9DB2CC; --line: #23405F; --field: #182C46;
-      --land: #132338; --park: #183A2E; --water: #173C5A; --river: #1F5578; --route: #EAF3FA;
-    }
-  }
-  :root[data-theme="dark"] {
-    --ink: #EAF3FA; --paper: #0E1A2C; --wash: #13243B; --muted: #9DB2CC; --line: #23405F; --field: #182C46;
-    --land: #132338; --park: #183A2E; --water: #173C5A; --river: #1F5578; --route: #EAF3FA;
-  }
-  *, *::before, *::after { box-sizing: inherit; }
-  body { margin: 0; background: var(--paper); color: var(--ink);
-    font-family: "Barlow", "Helvetica Neue", Arial, sans-serif; font-size: 17px; line-height: 1.45; }
-  main { max-width: 1040px; margin: 0 auto; padding: 20px 18px 48px; }
-
-  .flag { border-top: 10px solid var(--sky); border-bottom: 10px solid var(--sky); padding: 18px 0 16px; margin-bottom: 22px; }
-  .flag h1 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 800;
-    font-size: clamp(2.1rem, 8vw, 3rem); line-height: 1; margin: 0; letter-spacing: -0.01em; }
-  .flag p { margin: 6px 0 0; color: var(--muted); }
-  .stars { color: var(--star); letter-spacing: 0.3em; font-size: 1.1rem; }
-
-  .top { display: grid; gap: 18px; margin-bottom: 22px; }
-  @media (min-width: 860px) { .top { grid-template-columns: 1.4fr 1fr; align-items: end; } }
-  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
-  .controls .full { grid-column: 1 / -1; }
-  label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
-  input, select { width: 100%; font: inherit; font-size: 1.05rem; color: var(--ink); background: var(--field);
-    border: 2px solid var(--line); border-radius: 8px; padding: 9px 10px; }
-  input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
-  .pace { display: flex; align-items: center; gap: 6px; }
-  .pace input { text-align: center; }
-  .pace span { font-weight: 700; }
-  .hint { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
-
-  .finish { background: var(--ink); color: var(--paper); border-radius: 12px; padding: 16px 18px;
-    display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-  .finish .who { font-size: 0.95rem; opacity: 0.85; }
-  .finish .clock { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 800; font-size: 2.6rem; line-height: 1; }
-  .finish .elapsed { font-size: 0.95rem; text-align: right; }
-
-  .layout { display: grid; gap: 22px; }
-  @media (min-width: 860px) { .layout { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
-    .mapwrap { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); } }
-  .mapwrap { border: 2px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--land); }
-  #map { display: block; width: 100%; height: auto; max-height: 88vh; }
-  .maplabel { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 25px;
-    fill: var(--ink); paint-order: stroke; stroke: var(--land); stroke-width: 7px; stroke-linejoin: round; }
-  .maplabel.cheer { fill: var(--star); }
-  .hood { font-family: "Barlow", sans-serif; font-style: italic; font-size: 19px; fill: var(--muted); opacity: 0.85; }
-  .lake { font-family: "Barlow", sans-serif; font-style: italic; font-size: 24px; fill: var(--muted); }
-  .mk { cursor: pointer; }
-  .mk.sel circle.ring, .mk.sel path.starp { stroke: var(--star); stroke-width: 5; }
-  .mk.passed { opacity: 0.4; }
-  .maplegend { display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 14px; font-size: 0.85rem; color: var(--muted);
-    border-top: 2px solid var(--line); background: var(--paper); }
-  .maplegend span { display: inline-flex; align-items: center; gap: 6px; }
-
-  .toggles { display: flex; gap: 6px 18px; flex-wrap: wrap; margin: 0 0 12px; }
-  .toggle { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 500; }
-  .toggle input { width: 20px; height: 20px; accent-color: var(--star); }
-
-  ol.course { list-style: none; margin: 0; padding: 0; position: relative; }
-  ol.course::before { content: ""; position: absolute; left: 13px; top: 8px; bottom: 8px; width: 4px; background: var(--sky); border-radius: 2px; }
-  .row { position: relative; padding: 10px 8px 10px 44px; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px;
-    align-items: baseline; cursor: pointer; border-radius: 10px; }
-  .row .mark { position: absolute; left: 3px; top: 10px; width: 24px; height: 24px; display: grid; place-items: center; }
-  .row .mark svg { width: 24px; height: 24px; }
-  .row .name { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 1.35rem; line-height: 1.1; }
-  .row .time { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 1.5rem; text-align: right; line-height: 1.1; }
-  .row .where { color: var(--muted); font-size: 0.92rem; }
-  .row .el { color: var(--muted); font-size: 0.92rem; text-align: right; }
-  .row.cheer { background: var(--wash); margin: 4px 0; }
-  .row.cheer .name { font-family: "Barlow", sans-serif; font-weight: 600; font-size: 1.05rem; }
-    .row.sel { outline: 3px solid var(--star); outline-offset: -3px; }
-  .row.passed { opacity: 0.45; }
-  .row.next .name::after { content: "  Up next"; color: var(--star); font-family: "Barlow", sans-serif; font-size: 0.85rem; font-weight: 600; }
-
-  .foot { margin-top: 22px; font-size: 0.85rem; color: var(--muted); }
-</style>
+<meta name="description" content="When your runner will be where at the 2026 Chicago Marathon, plus the best places to cheer. Add your own spots and share one link with your crew.">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#41B6E6">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0E1A2C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pace Card">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<script type="module" src="/app.js"></script>
 </head>
 <body>
 <main>
@@ -109,28 +29,24 @@
     <section class="controls" aria-label="Runner details">
       <div class="full">
         <label for="name">Runner</label>
-        <input id="name" type="text" placeholder="Their name" autocomplete="off">
+        <input id="name" type="text" placeholder="Their name" autocomplete="off" maxlength="40">
       </div>
       <div>
         <label for="pmin">Pace per mile</label>
         <div class="pace">
-          <input id="pmin" type="number" min="4" max="25" value="11" aria-label="Minutes">
+          <input id="pmin" type="number" inputmode="numeric" min="4" max="25" value="11" aria-label="Minutes">
           <span>:</span>
-          <input id="psec" type="number" min="0" max="59" value="0" aria-label="Seconds">
+          <input id="psec" type="number" inputmode="numeric" min="0" max="59" value="0" aria-label="Seconds">
         </div>
         <div class="hint" id="kmPace"></div>
       </div>
       <div>
-        <label for="start">Wave start</label>
-        <select id="start">
-          <option value="7:35">Wave 1, 7:35 a.m.</option>
-          <option value="8:00">Wave 2, 8:00 a.m.</option>
-          <option value="8:35" selected>Wave 3, 8:35 a.m.</option>
-        </select>
+        <label for="wave">Wave start</label>
+        <select id="wave"></select>
       </div>
       <div class="full">
         <label for="delay">Minutes to reach the start line after the wave goes</label>
-        <input id="delay" type="number" min="0" max="45" value="10">
+        <input id="delay" type="number" inputmode="numeric" min="0" max="45" value="10">
         <div class="hint">Big waves take a while to cross the line. 10 minutes is a safe guess for Wave 3.</div>
       </div>
     </section>
@@ -140,265 +56,37 @@
         <div class="clock" id="finishClock">–</div>
       </div>
       <div class="elapsed" id="finishElapsed"></div>
+      <div class="share">
+        <button class="btn primary" id="share" type="button">Share this card</button>
+        <span class="hint">Sends everyone the same runner, times and spots.</span>
+      </div>
     </div>
   </div>
+
+  <section class="spots-card" aria-labelledby="spotsTitle">
+    <header>
+      <h2 id="spotsTitle">Your cheer spots</h2>
+      <p>Who is standing where. Pick a place along the course or type a mile.</p>
+    </header>
+    <div class="spots" id="spots"></div>
+    <p class="empty" id="spotsEmpty">No spots yet. Add one, or tap a popular spot in the list and choose “Add as my spot”.</p>
+    <button class="btn" id="addSpot" type="button">+ Add a spot</button>
+  </section>
 
   <div class="layout">
     <div class="mapwrap">
       <svg id="map" role="img" aria-label="Map of the Chicago Marathon course with split times"></svg>
-      <div class="maplegend">
-        <span><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#41B6E6" stroke="#0F2340" stroke-width="3"/></svg>5K splits</span>
-        <span><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#E4002B" d="M12 1.5l2.6 5.2 5.8-.9-3.2 4.9 3.2 4.9-5.8-.9L12 20l-2.6-5.3-5.8.9 3.2-4.9-3.2-4.9 5.8.9z"/></svg>A (you)</span>
-        <span><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#1B8A5A" d="M12 1.5l2.6 5.2 5.8-.9-3.2 4.9 3.2 4.9-5.8-.9L12 20l-2.6-5.3-5.8.9 3.2-4.9-3.2-4.9 5.8.9z"/></svg>Northerners</span>
-        <span><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#E07B00" d="M12 1.5l2.6 5.2 5.8-.9-3.2 4.9 3.2 4.9-5.8-.9L12 20l-2.6-5.3-5.8.9 3.2-4.9-3.2-4.9 5.8.9z"/></svg>Southerners</span>
-        <span>Tap a marker or row to highlight it</span>
-      </div>
+      <div class="maplegend" id="legend"></div>
     </div>
     <div>
-      <div class="toggles" role="group" aria-label="Cheer groups to show">
-        <label class="toggle"><input type="checkbox" id="g_a" checked style="accent-color:#E4002B"> A (you)</label>
-        <label class="toggle"><input type="checkbox" id="g_n" checked style="accent-color:#1B8A5A"> Northerners</label>
-        <label class="toggle"><input type="checkbox" id="g_s" checked style="accent-color:#E07B00"> Southerners</label>
+      <div class="toggles" role="group" aria-label="What to show">
+        <label class="toggle"><input type="checkbox" id="showHot" checked> Show popular spots</label>
       </div>
       <ol class="course" id="course"></ol>
     </div>
   </div>
 
-  <p class="foot">The map is a simplified drawing of the 2026 route, and marker spots are approximate. Times assume an even pace. On race day, use the official Chicago Marathon app's live tracking to adjust.</p>
+  <p class="foot">The map is a simplified drawing of the 2026 route, and marker spots are approximate. Times assume an even pace. On race day, use the official Chicago Marathon app's live tracking to adjust. Directions open in your maps app with transit selected, because many streets are closed.</p>
 </main>
-
-<script>
-(function () {
-  const MI = 1.609344, MAR_MI = 26.2188;
-
-  // Course waypoints [lat, lon, anchorMile?]. Anchors pin known mile points; distance between is interpolated.
-  const R = [
-    [41.8800,-87.6205,0],[41.8917,-87.6205],[41.8917,-87.6293],[41.8781,-87.6294],[41.8781,-87.6323,3.0],
-    [41.9000,-87.6323],[41.9110,-87.6330],[41.9150,-87.6335],[41.9215,-87.6342],[41.9255,-87.6355],[41.9260,-87.6325],
-    [41.9325,-87.6360],[41.9400,-87.6385],[41.9470,-87.6440],[41.9500,-87.6490,8.4],[41.9375,-87.6440],[41.9325,-87.6445],
-    [41.9255,-87.6400],[41.9217,-87.6370],[41.9217,-87.6390],[41.9108,-87.6385],[41.9108,-87.6348],[41.9000,-87.6343],
-    [41.8865,-87.6341],[41.8857,-87.6370,13.1],[41.8795,-87.6370],[41.8795,-87.6765],[41.8778,-87.6765,15.3],
-    [41.8778,-87.6470,17.4],[41.8695,-87.6470],[41.8695,-87.6605],[41.8577,-87.6605,19.9],[41.8577,-87.6465],[41.8540,-87.6465],
-    [41.8540,-87.6420],[41.8527,-87.6390],[41.8527,-87.6320,21.5],[41.8455,-87.6320],[41.8455,-87.6235],[41.8310,-87.6230],
-    [41.8310,-87.6215],[41.8385,-87.6215],[41.8385,-87.6232],[41.8675,-87.6245,26.0],[41.8675,-87.6200],[41.8735,-87.6200,MAR_MI]
-  ];
-
-  const GROUPS = {
-    a: { name: "A (you)", color: "#E4002B" },
-    n: { name: "Northerners", color: "#1B8A5A" },
-    s: { name: "Southerners", color: "#E07B00" }
-  };
-  const points = [
-    { mi: 0.02, label: "Start", short: "A: Start", where: "Columbus Dr., Grant Park", cheer: "a", cheerName: "A: Start line", side: "r", tip: "Cheer as they cross the line" },
-    { km: 5, label: "5K", where: "LaSalle St., the Loop", side: "l" },
-    { mi: 8.4, label: "Mile 8", short: "North: Turnaround", where: "Sheridan Rd. and Broadway, Lakeview", cheer: "n", cheerName: "Northerners: Northern tip of the course", side: "r", tip: "Farthest north the course goes, closest to Edgewater" },
-    { km: 10, label: "10K", where: "Stockton Dr., Lincoln Park", side: "r" },
-    { km: 15, label: "15K", where: "Broadway, Lakeview", side: "r" },
-    { km: 20, label: "20K", where: "Wells St., Old Town", side: "l" },
-    { km: 21.0975, label: "Halfway", where: "Wells St. and Wacker Dr.", side: "l" },
-    { mi: 14.0, label: "Mile 14", short: "A: Mile 14", where: "Adams St., West Loop", cheer: "a", cheerName: "A: Mile 14", side: "t" },
-    { km: 25, label: "25K", where: "Jackson Blvd., West Loop", side: "b" },
-    { mi: 17.0, label: "Mile 17", short: "A: Mile 17", where: "Jackson Blvd., West Loop", cheer: "a", cheerName: "A: Mile 17", side: "b" },
-    { km: 30, label: "30K", where: "Taylor St., Little Italy", side: "t" },
-    { mi: 20.2, label: "Mile 20", short: "South: Pilsen", where: "18th St., Pilsen", cheer: "s", cheerName: "Southerners option 1: Pilsen", side: "b" },
-    { km: 35, label: "35K", where: "Wentworth Ave., Chinatown", side: "b" },
-    { mi: 23.4, label: "Mile 23", short: "South: Bronzeville", where: "Michigan Ave., Bronzeville", cheer: "s", cheerName: "Southerners option 2: Bronzeville", side: "l" },
-    { km: 40, label: "40K", where: "Michigan Ave., Bronzeville", side: "r" },
-    { km: 42.195, label: "Finish", where: "Grant Park", side: "r" }
-  ];
-  points.forEach(p => { p.miles = p.mi != null ? p.mi : p.km / MI; p.kmv = p.km != null ? p.km : p.mi * MI; });
-
-  // Projection
-  const B = { n: 41.956, s: 41.826, w: -87.684, e: -87.597 };
-  const K = 100; // px per km
-  const kx = 111.2 * Math.cos(41.89 * Math.PI / 180) * K, ky = 111.2 * K;
-  const W = Math.round((B.e - B.w) * kx), H = Math.round((B.n - B.s) * ky);
-  const P = (lat, lon) => [(lon - B.w) * kx, (B.n - lat) * ky];
-
-  // Assign miles to every waypoint by interpolating between anchors
-  const xy = R.map(r => P(r[0], r[1]));
-  const seg = [0];
-  for (let i = 1; i < xy.length; i++) seg.push(seg[i - 1] + Math.hypot(xy[i][0] - xy[i - 1][0], xy[i][1] - xy[i - 1][1]));
-  const miles = new Array(R.length);
-  const anchors = R.map((r, i) => r[2] != null ? i : -1).filter(i => i >= 0);
-  for (let a = 0; a < anchors.length - 1; a++) {
-    const i0 = anchors[a], i1 = anchors[a + 1];
-    const m0 = R[i0][2], m1 = R[i1][2], d0 = seg[i0], d1 = seg[i1];
-    for (let i = i0; i <= i1; i++) miles[i] = m0 + (m1 - m0) * (seg[i] - d0) / (d1 - d0);
-  }
-  function posAt(m) {
-    for (let i = 1; i < miles.length; i++) {
-      if (m <= miles[i]) {
-        const t = (m - miles[i - 1]) / (miles[i] - miles[i - 1]);
-        return [xy[i - 1][0] + t * (xy[i][0] - xy[i - 1][0]), xy[i - 1][1] + t * (xy[i][1] - xy[i - 1][1])];
-      }
-    }
-    return xy[xy.length - 1];
-  }
-
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.getElementById("map");
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const pts = arr => arr.map(([la, lo]) => P(la, lo).map(v => v.toFixed(1)).join(",")).join(" ");
-  function el(tag, attrs, parent) { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; }
-
-  // Background
-  el("rect", { x: 0, y: 0, width: W, height: H, fill: "var(--land)" });
-  // Lakefront parks (rough strips)
-  el("polygon", { points: pts([[41.956,-87.6415],[41.945,-87.6395],[41.932,-87.6345],[41.924,-87.6365],[41.912,-87.6325],[41.912,-87.6245],[41.926,-87.627],[41.940,-87.6305],[41.956,-87.636]]), fill: "var(--park)" });
-  el("polygon", { points: pts([[41.8845,-87.6245],[41.8845,-87.6150],[41.8665,-87.6140],[41.8665,-87.6245]]), fill: "var(--park)" });
-  // Lake
-  const shore = [[41.956,-87.636],[41.940,-87.6305],[41.926,-87.627],[41.912,-87.6245],[41.902,-87.6230],[41.8935,-87.6150],[41.8925,-87.5995],[41.8905,-87.5995],[41.8895,-87.6120],[41.8820,-87.6145],[41.8720,-87.6135],[41.8660,-87.6100],[41.8600,-87.6080],[41.8500,-87.6110],[41.8380,-87.6060],[41.826,-87.6010]];
-  el("polygon", { points: pts(shore) + " " + P(41.826, -87.597).join(",") + " " + P(41.956, -87.597).join(","), fill: "var(--water)" });
-  // River
-  el("polyline", { points: pts([[41.8888,-87.6135],[41.8872,-87.6280],[41.8868,-87.6375],[41.8920,-87.6405],[41.8990,-87.6440],[41.9090,-87.6505],[41.9200,-87.6560]]), fill: "none", stroke: "var(--river)", "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round" });
-  el("polyline", { points: pts([[41.8868,-87.6375],[41.8760,-87.6378],[41.8660,-87.6365],[41.8570,-87.6385],[41.8500,-87.6455],[41.8460,-87.6560],[41.8440,-87.6700]]), fill: "none", stroke: "var(--river)", "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round" });
-
-  // Labels for context
-  [["Lake Michigan", 41.915, -87.6125, "lake"], ["Lakeview", 41.9445, -87.6560, "hood"], ["Lincoln Park", 41.9235, -87.6560, "hood"],
-   ["Old Town", 41.9075, -87.6530, "hood"], ["The Loop", 41.8745, -87.6300, "hood"], ["West Loop", 41.8840, -87.6620, "hood"],
-   ["Little Italy", 41.8650, -87.6680, "hood"], ["Pilsen", 41.8530, -87.6700, "hood"], ["Chinatown", 41.8490, -87.6425, "hood"],
-   ["Bronzeville", 41.8330, -87.6120, "hood"], ["Grant Park", 41.8760, -87.6190, "hood"]]
-    .forEach(([t, la, lo, c]) => { const [x, y] = P(la, lo); const tx = el("text", { x, y, class: c, "text-anchor": "middle" }); tx.textContent = t; });
-
-  // Route
-  el("polyline", { points: xy.map(p => p.map(v => v.toFixed(1)).join(",")).join(" "), fill: "none", stroke: "var(--paper)", "stroke-width": 13, "stroke-linejoin": "round", "stroke-linecap": "round" });
-  el("polyline", { points: xy.map(p => p.map(v => v.toFixed(1)).join(",")).join(" "), fill: "none", stroke: "var(--route)", "stroke-width": 6, "stroke-linejoin": "round", "stroke-linecap": "round" });
-  const [sx, sy] = xy[0];
-  el("rect", { x: sx - 10, y: sy - 5, width: 20, height: 10, fill: "#41B6E6", stroke: "var(--route)", "stroke-width": 2 });
-
-  const markerLayer = el("g", {});
-  const runner = el("g", { style: "display:none" });
-  el("circle", { r: 16, fill: "#E4002B", opacity: 0.25 }, runner);
-  el("circle", { r: 8, fill: "#E4002B", stroke: "#fff", "stroke-width": 3 }, runner);
-
-  const $ = id => document.getElementById(id);
-  const starSvg = c => '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="' + c + '" d="M12 1.5l2.6 5.2 5.8-.9-3.2 4.9 3.2 4.9-5.8-.9L12 20l-2.6-5.3-5.8.9 3.2-4.9-3.2-4.9 5.8.9z"/></svg>';
-  const dotSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="var(--paper)" stroke="#41B6E6" stroke-width="4"/></svg>';
-  const flagSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#0F2340"/><path d="M8 17V7h8l-2 3 2 3H9" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>';
-  let selected = -1;
-
-  function load() {
-    try {
-      const s = JSON.parse(localStorage.getItem("paceCard") || "{}");
-      if (s.name != null) $("name").value = s.name;
-      if (s.pmin != null) $("pmin").value = s.pmin;
-      if (s.psec != null) $("psec").value = s.psec;
-      if (s.start) $("start").value = s.start;
-      if (s.delay != null) $("delay").value = s.delay;
-      ["a","n","s"].forEach(g => { if (s["g_" + g] != null) $("g_" + g).checked = s["g_" + g]; });
-    } catch (e) {}
-  }
-  function save() {
-    try {
-      localStorage.setItem("paceCard", JSON.stringify({ name: $("name").value, pmin: $("pmin").value, psec: $("psec").value,
-        start: $("start").value, delay: $("delay").value, g_a: $("g_a").checked, g_n: $("g_n").checked, g_s: $("g_s").checked }));
-    } catch (e) {}
-  }
-  function clock(t, short) {
-    let h = Math.floor(t / 60), m = Math.round(t % 60);
-    if (m === 60) { h += 1; m = 0; }
-    const h12 = ((h + 11) % 12) + 1, s = h12 + ":" + String(m).padStart(2, "0");
-    return short ? s : s + (h >= 12 ? " p.m." : " a.m.");
-  }
-  function elapsed(min) {
-    const s = Math.round(min * 60), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-    return h + ":" + String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
-  }
-  function select(i) { selected = selected === i ? -1 : i; render(); }
-
-  function render() {
-    const pm = Math.max(0, parseFloat($("pmin").value) || 0);
-    const ps = Math.min(59, Math.max(0, parseFloat($("psec").value) || 0));
-    const paceMile = pm + ps / 60, ok = paceMile > 0;
-    const [sh, sm] = $("start").value.split(":").map(Number);
-    const startLine = sh * 60 + sm + Math.max(0, parseFloat($("delay").value) || 0);
-    const perKm = paceMile / MI, name = $("name").value.trim();
-
-    const kmMin = Math.floor(perKm); let kmSec = Math.round((perKm - kmMin) * 60); if (kmSec === 60) kmSec = 0;
-    $("kmPace").textContent = ok ? "That's " + kmMin + ":" + String(kmSec).padStart(2, "0") + " per km" : "";
-    const finishMin = 42.195 * perKm;
-    $("who").textContent = name ? name + " should finish around" : "Projected finish";
-    $("finishClock").textContent = ok ? clock(startLine + finishMin) : "–";
-    $("finishElapsed").textContent = ok ? "Race time " + elapsed(finishMin) : "Enter a pace";
-
-    const now = new Date();
-    const isRaceDay = now.getFullYear() === 2026 && now.getMonth() === 9 && now.getDate() === 11;
-    const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-
-    // Runner dot on race day
-    if (isRaceDay && ok && nowMin > startLine && nowMin < startLine + finishMin) {
-      const m = ((nowMin - startLine) / paceMile);
-      const [x, y] = posAt(m);
-      runner.setAttribute("transform", `translate(${x},${y})`); runner.style.display = "";
-    } else runner.style.display = "none";
-
-    markerLayer.innerHTML = "";
-    const list = $("course"); list.innerHTML = "";
-    let nextFound = false;
-    points.forEach((p, i) => {
-      if (p.cheer && !$("g_" + p.cheer).checked) return;
-      const el_ = p.kmv * perKm, at = startLine + el_;
-      let state = "";
-      if (isRaceDay && ok) { if (at < nowMin) state = "passed"; else if (!nextFound) { state = "next"; nextFound = true; } }
-
-      // Map marker
-      if (p.label !== "Finish" || true) {
-        const [x, y] = posAt(p.miles);
-        const g = document.createElementNS(ns, "g");
-        g.setAttribute("class", "mk" + (selected === i ? " sel" : "") + (state === "passed" ? " passed" : ""));
-        g.setAttribute("transform", `translate(${x.toFixed(1)},${y.toFixed(1)})`);
-        g.setAttribute("tabindex", "0"); g.setAttribute("role", "button");
-        g.setAttribute("aria-label", (p.cheer ? p.cheerName : p.label) + ", " + (ok ? clock(at) : ""));
-        if (p.cheer) {
-          const s = document.createElementNS(ns, "path");
-          s.setAttribute("class", "starp");
-          s.setAttribute("d", "M0 -17 L4.3 -8.4 L14 -9.8 L8.6 -1.8 L14 6.2 L4.3 4.8 L0 13.4 L-4.3 4.8 L-14 6.2 L-8.6 -1.8 L-14 -9.8 L-4.3 -8.4 Z");
-          s.setAttribute("fill", GROUPS[p.cheer].color); s.setAttribute("stroke", "#fff"); s.setAttribute("stroke-width", "2.5");
-          g.appendChild(s);
-        } else if (p.label === "Finish") {
-          const c = document.createElementNS(ns, "circle"); c.setAttribute("r", 13); c.setAttribute("class", "ring");
-          c.setAttribute("fill", "#0F2340"); c.setAttribute("stroke", "#fff"); c.setAttribute("stroke-width", "3"); g.appendChild(c);
-        } else {
-          const c = document.createElementNS(ns, "circle"); c.setAttribute("r", 11); c.setAttribute("class", "ring");
-          c.setAttribute("fill", "#41B6E6"); c.setAttribute("stroke", "#0F2340"); c.setAttribute("stroke-width", "3.5"); g.appendChild(c);
-        }
-        const t = document.createElementNS(ns, "text");
-        t.setAttribute("class", "maplabel"); if (p.cheer) t.style.fill = GROUPS[p.cheer].color;
-        const off = { l: [-20, 9, "end"], r: [20, 9, "start"], t: [0, -22, "middle"], b: [0, 38, "middle"] }[p.side];
-        t.setAttribute("x", off[0]); t.setAttribute("y", off[1]); t.setAttribute("text-anchor", off[2]);
-        t.textContent = (p.cheer ? p.short : p.label) + (ok ? " " + clock(at, true) : "");
-        g.appendChild(t);
-        g.addEventListener("click", () => select(i));
-        g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(i); } });
-        markerLayer.appendChild(g);
-      }
-
-      // List row
-      const li = document.createElement("li");
-      li.className = "row" + (p.cheer ? " cheer" : "") + (state ? " " + state : "") + (selected === i ? " sel" : "");
-      const icon = p.label === "Finish" ? flagSvg : (p.cheer ? starSvg(GROUPS[p.cheer].color) : dotSvg);
-      li.innerHTML = '<span class="mark">' + icon + '</span>' +
-        '<span class="name">' + (p.cheer ? p.cheerName : p.label) + '</span>' +
-        '<span class="time">' + (ok ? clock(at) : "–") + '</span>' +
-        '<span class="where">' + (p.cheer ? p.label + ", " + p.where + (p.tip ? ". " + p.tip : "") : p.where) + '</span>' +
-        '<span class="el">' + (ok ? elapsed(el_) : "") + '</span>';
-      li.addEventListener("click", () => select(i));
-      if (p.cheer) { li.style.borderLeft = "5px solid " + GROUPS[p.cheer].color; li.querySelector(".time").style.color = GROUPS[p.cheer].color; }
-      list.appendChild(li);
-    });
-    // Keep selected marker on top
-    const sel = markerLayer.querySelector(".sel"); if (sel) markerLayer.appendChild(sel);
-    svg.appendChild(runner);
-    save();
-  }
-
-  load();
-  ["name", "pmin", "psec", "start", "delay"].forEach(id => $(id).addEventListener("input", render));
-  ["g_a","g_n","g_s"].forEach(id => $(id).addEventListener("change", render));
-  render();
-  setInterval(render, 60000);
-})();
-</script>
 </body>
 </html>
