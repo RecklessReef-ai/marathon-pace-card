@@ -2,7 +2,7 @@
 import { R, BOUNDS, SPLITS, SEGMENTS, HOTSPOTS, PALETTE, WAVES, RACE_DATE } from "./course-data.js";
 import {
   projectRoute, posAt, resolveHotspots, computeSplits, finishFor, runnerMileAt, isRaceDay, colorsFor, groupKey,
-  fmtClock, fmtElapsed, fmtPace, fmtPacePerKm, startLineMinutes, whereAt, directionsUrl, latLonAt,
+  fmtClock, fmtElapsed, fmtPacePerKm, whereAt, directionsUrl, latLonAt,
   normalizeState, normalizeSpot, newId, encodeShare, decodeShare, DEFAULT_STATE, LIMITS
 } from "./pace.js";
 import { buildMap, drawMarker } from "./map.js";
@@ -49,7 +49,7 @@ function iconSvg(kind, color) {
   const mk = (tag, attrs) => { const e = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; };
   if (kind === "spot") mk("path", { d: STAR_D, fill: color });
   else if (kind === "hot") { mk("path", { d: "M12 2 L22 12 L12 22 L2 12 Z", fill: "var(--paper)", stroke: "#41B6E6", "stroke-width": 3 }); mk("circle", { cx: 12, cy: 12, r: 2.5, fill: "#0F2340" }); }
-  else if (kind === "finish") { mk("path", { d: "M7 21V4h11l-3 4 3 4H9", fill: "none", stroke: color || "#fff", "stroke-width": 2.2, "stroke-linejoin": "round", "stroke-linecap": "round" }); }
+  else if (kind === "finish") { mk("circle", { cx: 12, cy: 12, r: 10, fill: "#0F2340" }); mk("path", { d: "M8 17V7h8l-2 3 2 3H9", fill: "none", stroke: "#fff", "stroke-width": 1.8, "stroke-linejoin": "round" }); }
   else mk("circle", { cx: 12, cy: 12, r: 8, fill: "var(--paper)", stroke: "#41B6E6", "stroke-width": 4 });
   return svg;
 }
@@ -178,15 +178,10 @@ function render() {
   const ok = state.paceSec > 0;
   const name = state.name.trim();
   const fin = finishFor(state);
-  const startLine = startLineMinutes(state.wave, state.delay);
   $("kmPace").textContent = ok ? "That's " + fmtPacePerKm(state.paceSec) + " per km" : "";
-  $("bibName").textContent = name || "Your runner";
-  $("bibWave").textContent = "Wave " + state.wave;
-  $("bibLead").textContent = name ? "Finishes around" : "Add a name and pace";
+  $("who").textContent = name ? name + " should finish around" : "Projected finish";
   $("finishClock").textContent = ok ? fmtClock(fin.clockMin) : "–";
-  $("bibMeta").textContent = ok
-    ? `${fmtPace(state.paceSec)} per mile. Across the start line at ${fmtClock(startLine)} Race time ${fmtElapsed(fin.elapsedMin)}.`
-    : "";
+  $("finishElapsed").textContent = ok ? "Race time " + fmtElapsed(fin.elapsedMin) : "Enter a pace";
 
   const now = new Date();
   const raceDay = isRaceDay(now, RACE_DATE);
@@ -210,15 +205,13 @@ function render() {
     g.addEventListener("click", () => select(row.key));
     g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(row.key); } });
 
-    const signText = { Halfway: "Half", Start: "Start" }[row.label] || row.label;
-    const sign = row.kind === "split" ? h("span", { class: "sign", text: signText }) : h("span", { class: "sign" }, iconSvg(row.kind, "#FFFFFF"));
     const li = h("li", { class: ["row", "k-" + row.kind, phase, selected ? "sel" : ""].filter(Boolean).join(" "), tabindex: "0", "aria-expanded": String(selected) },
-      sign,
+      h("span", { class: "mark" }, iconSvg(row.kind, row.color)),
       h("span", { class: "name", text: row.label }),
       h("span", { class: "time", text: ok ? fmtClock(row.clockMin) : "–" }),
-      h("span", { class: "where", text: row.kind === "spot" ? `Mile ${row.mile}, ${row.where}${row.note ? ". " + row.note[0].toUpperCase() + row.note.slice(1) : ""}` : row.where }),
+      h("span", { class: "where", text: row.kind === "spot" ? `Mile ${row.mile}, ${row.where}${row.note ? ". " + row.note : ""}` : row.where }),
       h("span", { class: "el", text: ok ? fmtElapsed(row.elapsedMin) : "" }));
-    if (row.kind === "spot") { li.querySelector(".sign").style.background = row.color; li.querySelector(".time").style.color = row.color; }
+    if (row.kind === "spot") { li.style.borderLeft = "5px solid " + row.color; li.querySelector(".time").style.color = row.color; }
     if (selected) {
       const detail = h("div", { class: "detail" });
       if (row.hot) {
@@ -239,22 +232,6 @@ function render() {
   const sel = layers.markerLayer.querySelector(".sel"); if (sel) layers.markerLayer.appendChild(sel);
   layers.markerLayer.parentNode.appendChild(layers.runner);
   renderLegend();
-  renderNext(rows, raceDay && ok, nowMin, startLine, fin);
-}
-
-// Race-day line on the bib: where to look next.
-function renderNext(rows, live, nowMin, startLine, fin) {
-  const el = $("bibNext");
-  if (!live) { el.hidden = true; return; }
-  let text;
-  if (nowMin < startLine) text = "Starts at " + fmtClock(startLine) + ", in " + Math.ceil(startLine - nowMin) + " min.";
-  else if (nowMin >= fin.clockMin) text = "Finished around " + fmtClock(fin.clockMin) + ". Go find them at Grant Park.";
-  else {
-    const next = rows.find(r => r.clockMin >= nowMin);
-    const mins = Math.max(1, Math.ceil(next.clockMin - nowMin));
-    text = "Up next: " + next.label + ", " + next.where + ". About " + fmtClock(next.clockMin) + ", in " + mins + " min.";
-  }
-  el.textContent = text; el.hidden = false;
 }
 
 // ---------- share ----------
@@ -309,15 +286,6 @@ function boot() {
   $("showHot").addEventListener("change", readControls);
   $("addSpot").addEventListener("click", () => addSpot());
   $("share").addEventListener("click", share);
-  const setEditor = open => {
-    $("editor").hidden = !open;
-    $("editToggle").setAttribute("aria-expanded", String(open));
-    $("editToggle").textContent = open ? "Close" : "Edit runner";
-    if (open) $("name").focus({ preventScroll: true });
-  };
-  $("editToggle").addEventListener("click", () => setEditor($("editor").hidden));
-  $("editDone").addEventListener("click", () => { setEditor(false); $("editToggle").focus(); });
-  setEditor(!state.name);
   if (/^https:\/\//.test(SUPPORT_URL)) { $("supportLink").href = SUPPORT_URL; $("support").hidden = false; }
   render();
   setInterval(render, 60000);

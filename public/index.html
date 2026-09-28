@@ -19,34 +19,17 @@
 </head>
 <body>
 <main>
-  <header class="masthead">
+  <header class="flag">
+    <div class="stars" aria-hidden="true">✶ ✶ ✶ ✶</div>
     <h1>Chicago Marathon pace card</h1>
-    <p>Sunday, October 11, 2026. When your runner will be where, and where to stand.</p>
+    <p>Sunday, October 11, 2026. When to be where, 5K by 5K.</p>
   </header>
 
-  <section class="bib" aria-label="Your runner" aria-live="polite">
-    <div class="bib-band">
-      <span class="stars" aria-hidden="true">✶ ✶ ✶ ✶</span>
-      <span class="bib-wave" id="bibWave">Wave 3</span>
-    </div>
-    <div class="bib-body">
-      <p class="bib-name" id="bibName">Your runner</p>
-      <p class="bib-lead" id="bibLead">Finishes around</p>
-      <p class="bib-time" id="finishClock">–</p>
-      <p class="bib-meta" id="bibMeta"></p>
-      <p class="bib-next" id="bibNext" hidden></p>
-      <div class="bib-actions">
-        <button class="btn" id="editToggle" type="button" aria-expanded="false" aria-controls="editor">Edit runner</button>
-        <button class="btn primary" id="share" type="button">Share this card</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="editor" id="editor" hidden aria-label="Runner details">
-    <div class="controls">
+  <div class="top">
+    <section class="controls" aria-label="Runner details">
       <div class="full">
-        <label for="name">Runner's name</label>
-        <input id="name" type="text" placeholder="Sara" autocomplete="off" maxlength="40">
+        <label for="name">Runner</label>
+        <input id="name" type="text" placeholder="Their name" autocomplete="off" maxlength="40">
       </div>
       <div>
         <label for="pmin">Pace per mile</label>
@@ -55,7 +38,7 @@
           <span>:</span>
           <input id="psec" type="number" inputmode="numeric" min="0" max="59" value="0" aria-label="Seconds">
         </div>
-        <p class="hint" id="kmPace"></p>
+        <div class="hint" id="kmPace"></div>
       </div>
       <div>
         <label for="wave">Wave start</label>
@@ -64,49 +47,50 @@
       <div class="full">
         <label for="delay">Minutes to reach the start line after the wave goes</label>
         <input id="delay" type="number" inputmode="numeric" min="0" max="45" value="10">
-        <p class="hint">Big waves take a while to cross the line. 10 minutes is a safe guess for Wave 3.</p>
+        <div class="hint">Big waves take a while to cross the line. 10 minutes is a safe guess for Wave 3.</div>
       </div>
-      <div class="full editor-actions">
-        <button class="btn primary" id="editDone" type="button">Done</button>
+    </section>
+    <div class="finish" aria-live="polite">
+      <div>
+        <div class="who" id="who">Projected finish</div>
+        <div class="clock" id="finishClock">–</div>
+      </div>
+      <div class="elapsed" id="finishElapsed"></div>
+      <div class="share">
+        <button class="btn primary" id="share" type="button">Share this card</button>
+        <span class="hint">Sends everyone the same runner, times and spots.</span>
       </div>
     </div>
-  </section>
+  </div>
 
-  <div class="stripe" role="presentation"></div>
-
-  <section class="spots" aria-labelledby="spotsTitle">
-    <div class="section-head">
+  <section class="spots-card" aria-labelledby="spotsTitle">
+    <header>
       <h2 id="spotsTitle">Your cheer spots</h2>
-      <button class="btn" id="addSpot" type="button">Add a spot</button>
-    </div>
-    <p class="section-lead">Who is standing where. Pick a place along the course or type a mile.</p>
-    <div class="spot-list" id="spots"></div>
-    <p class="empty" id="spotsEmpty">No spots yet. Add one, or open a popular spot below and choose Add as my spot.</p>
+      <p>Who is standing where. Pick a place along the course or type a mile.</p>
+    </header>
+    <div class="spots" id="spots"></div>
+    <p class="empty" id="spotsEmpty">No spots yet. Add one, or tap a popular spot in the list and choose “Add as my spot”.</p>
+    <button class="btn" id="addSpot" type="button">+ Add a spot</button>
   </section>
 
-  <div class="stripe" role="presentation"></div>
-
-  <section class="course" aria-labelledby="courseTitle">
-    <div class="section-head">
-      <h2 id="courseTitle">The course, in order</h2>
-      <label class="toggle"><input type="checkbox" id="showHot" checked> Show popular spots</label>
+  <div class="layout">
+    <div class="mapwrap">
+      <svg id="map" role="img" aria-label="Map of the Chicago Marathon course with split times"></svg>
+      <div class="maplegend" id="legend"></div>
     </div>
-    <div class="layout">
-      <div class="mapwrap">
-        <svg id="map" role="img" aria-label="Map of the Chicago Marathon course with split times"></svg>
-        <div class="maplegend" id="legend"></div>
+    <div>
+      <div class="toggles" role="group" aria-label="What to show">
+        <label class="toggle"><input type="checkbox" id="showHot" checked> Show popular spots</label>
       </div>
-      <ol class="rows" id="course"></ol>
+      <ol class="course" id="course"></ol>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    <p class="support" id="support" hidden>
-      <span>Free to use and share. If it helped you find your runner, you can chip in for the hosting and coffee.</span>
-      <a class="btn small" id="supportLink" href="#" target="_blank" rel="noopener">Support this app</a>
-    </p>
-    <p class="foot">The route is drawn from the official course GPS track, and the lake, river and parks come from OpenStreetMap (© OpenStreetMap contributors). Mile markers and spots are placed to within about a block. Times assume an even pace. On race day, use the official Chicago Marathon app's live tracking to adjust. Directions open in your maps app with transit selected, because many streets are closed.</p>
-  </footer>
+  <p class="support" id="support" hidden>
+    <span>Free to use and share. If it helped you find your runner, you can chip in for the hosting and coffee.</span>
+    <a class="btn small" id="supportLink" href="#" target="_blank" rel="noopener">Support this app</a>
+  </p>
+  <p class="foot">The route is drawn from the official course GPS track, and the lake, river and parks come from OpenStreetMap (© OpenStreetMap contributors). Mile markers and spots are placed to within about a block. Times assume an even pace. On race day, use the official Chicago Marathon app's live tracking to adjust. Directions open in your maps app with transit selected, because many streets are closed.</p>
 </main>
 </body>
 </html>
