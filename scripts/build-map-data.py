@@ -1,0 +1,113 @@
+"""Rebuild public/map-data.js (lake, river, parks) and print the course waypoints for course-data.js.
+
+Inputs (not committed; fetch them into a scratch folder):
+  course.gpx        the official course track, e.g. the GoAndRace export of the current year
+  osm-water.json    Overpass: (way["natural"="coastline"];way["waterway"~"^(river|canal)$"];
+                    way["natural"="water"];relation["natural"="water"];)(bbox 41.80,-87.72,41.98,-87.55); out geom;
+  osm-parks.json    Overpass: (way["leisure"~"^(park|garden|nature_reserve)$"];relation[same];)(same bbox); out geom;
+
+Usage: python3 scripts/build-map-data.py <scratch-dir>
+Data (c) OpenStreetMap contributors, ODbL. Needs Python 3 only.
+"""
+import json, math, os, re, sys
+
+SRC = sys.argv[1] if len(sys.argv) > 1 else "."
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "map-data.js")
+BOX = dict(n=41.958, s=41.824, w=-87.692, e=-87.594)   # must match BOUNDS in course-data.js
+MAR_MI = 26.2188
+
+def hav(a, b):
+    R = 6371000; la1, lo1, la2, lo2 = map(math.radians, (a[0], a[1], b[0], b[1]))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(h))
+KX = 111320 * math.cos(math.radians(41.89)); KY = 110950
+XY = lambda p: ((p[1] + 87.65) * KX, (p[0] - 41.89) * KY)
+def pdist(p, a, b):
+    (x, y), (x1, y1), (x2, y2) = XY(p), XY(a), XY(b); dx, dy = x2 - x1, y2 - y1; L = dx * dx + dy * dy
+    t = 0 if L == 0 else max(0, min(1, ((x - x1) * dx + (y - y1) * dy) / L))
+    return math.hypot(x - (x1 + t * dx), y - (y1 + t * dy))
+def dp(pts, eps_m):
+    if len(pts) < 3: return pts
+    imax, dmax = 0, 0
+    for i in range(1, len(pts) - 1):
+        d = pdist(pts[i], pts[0], pts[-1])
+        if d > dmax: imax, dmax = i, d
+    return dp(pts[:imax + 1], eps_m)[:-1] + dp(pts[imax:], eps_m) if dmax > eps_m else [pts[0], pts[-1]]
+def geom(e): return [(g["lat"], g["lon"]) for g in e.get("geometry", []) if g]
+def outers(e):
+    segs = [[(g["lat"], g["lon"]) for g in m["geometry"] if g] for m in e.get("members", []) if m.get("role") == "outer" and m.get("geometry")]
+    rings = []
+    while segs:
+        cur = segs.pop(0); changed = True
+        while changed and cur[0] != cur[-1]:
+            changed = False
+            for i, s in enumerate(segs):
+                if s[0] == cur[-1]: cur += s[1:]; segs.pop(i); changed = True; break
+                if s[-1] == cur[-1]: cur += s[::-1][1:]; segs.pop(i); changed = True; break
+                if s[-1] == cur[0]: cur = s + cur[1:]; segs.pop(i); changed = True; break
+                if s[0] == cur[0]: cur = s[::-1] + cur[1:]; segs.pop(i); changed = True; break
+        rings.append(cur)
+    return rings
+def area(r):
+    a = 0
+    for i in range(len(r)): a += r[i][1] * r[(i + 1) % len(r)][0] - r[(i + 1) % len(r)][1] * r[i][0]
+    return abs(a) / 2
+def inwin(r): return any(BOX["s"] - 0.005 <= la <= BOX["n"] + 0.005 and BOX["w"] - 0.005 <= lo <= BOX["e"] + 0.005 for la, lo in r)
+def clip_rect(poly, pad=0.01):
+    edges = [("s", BOX["s"] - pad), ("n", BOX["n"] + pad), ("w", BOX["w"] - pad), ("e", BOX["e"] + pad)]
+    inside = lambda p, k, v: p[0] >= v if k == "s" else p[0] <= v if k == "n" else p[1] >= v if k == "w" else p[1] <= v
+    def inter(a, b, k, v):
+        if k in ("s", "n"): t = (v - a[0]) / (b[0] - a[0]); return (v, a[1] + t * (b[1] - a[1]))
+        t = (v - a[1]) / (b[1] - a[1]); return (a[0] + t * (b[0] - a[0]), v)
+    out = poly
+    for k, v in edges:
+        inp, out = out, []
+        if not inp: break
+        prev = inp[-1]
+        for cur in inp:
+            if inside(cur, k, v):
+                if not inside(prev, k, v): out.append(inter(prev, cur, k, v))
+                out.append(cur)
+            elif inside(prev, k, v): out.append(inter(prev, cur, k, v))
+            prev = cur
+    return out
+rr = lambda r: [[round(a, 5), round(b, 5)] for a, b in r]
+
+water = json.load(open(os.path.join(SRC, "osm-water.json")))["elements"]
+lake = []
+rivers, riverlines = [], []
+for e in water:
+    t = e.get("tags", {})
+    if e["type"] == "relation" and t.get("name") == "Lake Michigan":
+        lake = dp(clip_rect(max(outers(e), key=len)), 9)
+    elif t.get("natural") == "water" and t.get("name") != "Lake Michigan":
+        for r in (outers(e) if e["type"] == "relation" else [geom(e)]):
+            if len(r) > 3 and inwin(r) and area(r) > 1e-6: rivers.append(dp(r, 11))
+    elif e["type"] == "way" and t.get("waterway") in ("river", "canal") and inwin(geom(e)):
+        riverlines.append(dp(geom(e), 11))
+parks = []
+for e in json.load(open(os.path.join(SRC, "osm-parks.json")))["elements"]:
+    t = e.get("tags", {})
+    if "Cemetery" in t.get("name", ""): continue
+    for r in (outers(e) if e["type"] == "relation" else [geom(e)]):
+        if len(r) > 3 and inwin(r) and area(r) > 6e-6: parks.append(dp(r, 28))
+js = "// Generated by scripts/build-map-data.py from OpenStreetMap data (ODbL, openstreetmap.org/copyright). Coordinates are [lat, lon].\n"
+js += "// Lake Michigan, the Chicago River and the bigger parks around the course, simplified for a small SVG.\n"
+js += "export const LAKE = " + json.dumps(rr(lake), separators=(",", ":")) + ";\n"
+js += "export const RIVERS = " + json.dumps([rr(r) for r in rivers], separators=(",", ":")) + ";\n"
+js += "export const RIVER_LINES = " + json.dumps([rr(r) for r in riverlines], separators=(",", ":")) + ";\n"
+js += "export const PARKS = " + json.dumps([rr(r) for r in parks], separators=(",", ":")) + ";\n"
+open(OUT, "w").write(js)
+print("wrote", OUT, len(js), "bytes")
+
+gpx_path = os.path.join(SRC, "course.gpx")
+if os.path.exists(gpx_path):
+    pts = [(float(a), float(b)) for a, b in re.findall(r'<trkpt[^>]*lat="([-\d.]+)"[^>]*lon="([-\d.]+)"', open(gpx_path).read())]
+    pts = dp(pts, 3)
+    cum = [0]
+    for i in range(1, len(pts)): cum.append(cum[-1] + hav(pts[i - 1], pts[i]))
+    scale = MAR_MI / (cum[-1] / 1609.344)
+    R = [[round(p[0], 5), round(p[1], 5), round(c / 1609.344 * scale, 3)] for p, c in zip(pts, cum)]
+    R[-1][2] = MAR_MI
+    print("\n// Paste into course-data.js as R (%d points, track %.2f km):" % (len(R), cum[-1] / 1000))
+    print(json.dumps(R, separators=(",", ":")))

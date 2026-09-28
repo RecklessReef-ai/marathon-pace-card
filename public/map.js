@@ -1,5 +1,6 @@
 // SVG map drawing. Knows about the DOM, knows nothing about pace or state.
 import { MAP } from "./course-data.js";
+import { LAKE, RIVERS, RIVER_LINES, PARKS } from "./map-data.js";
 import { posAt } from "./pace.js";
 
 const ns = "http://www.w3.org/2000/svg";
@@ -22,10 +23,10 @@ export function buildMap(svg, route) {
   const pts = arr => arr.map(([la, lo]) => P(la, lo).map(v => v.toFixed(1)).join(",")).join(" ");
 
   el("rect", { x: 0, y: 0, width: W, height: H, fill: "var(--land)" }, svg);
-  for (const park of MAP.parks) el("polygon", { points: pts(park), fill: "var(--park)" }, svg);
-  // The lake closes along the east edge of the canvas.
-  el("polygon", { points: pts(MAP.shore) + ` ${W},${H} ${W},0`, fill: "var(--water)" }, svg);
-  for (const river of MAP.rivers) el("polyline", { points: pts(river), fill: "none", stroke: "var(--river)", "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round" }, svg);
+  el("polygon", { points: pts(LAKE), fill: "var(--water)" }, svg);
+  for (const park of PARKS) el("polygon", { points: pts(park), fill: "var(--park)" }, svg);
+  for (const river of RIVERS) el("polygon", { points: pts(river), fill: "var(--water)" }, svg);
+  for (const line of RIVER_LINES) el("polyline", { points: pts(line), fill: "none", stroke: "var(--water)", "stroke-width": 5, "stroke-linecap": "round", "stroke-linejoin": "round" }, svg);
   for (const [t, la, lo, c] of MAP.labels) {
     const [x, y] = P(la, lo);
     const tx = el("text", { x, y, class: c, "text-anchor": "middle" }, svg);
@@ -37,6 +38,14 @@ export function buildMap(svg, route) {
   const [sx, sy] = xy[0];
   el("rect", { x: sx - 10, y: sy - 5, width: 20, height: 10, fill: "#41B6E6", stroke: "var(--route)", "stroke-width": 2 }, svg);
 
+  const mileLayer = el("g", { class: "miles", "aria-hidden": "true" }, svg);
+  for (let m = 1; m <= 26; m++) {
+    const [x, y] = posAt(route, m);
+    const g = el("g", { transform: `translate(${x.toFixed(1)},${y.toFixed(1)})` }, mileLayer);
+    el("circle", { r: 10, fill: "var(--paper)", stroke: "var(--route)", "stroke-width": 2 }, g);
+    const t = el("text", { class: "milenum", y: 4.5, "text-anchor": "middle" }, g);
+    t.textContent = String(m);
+  }
   const markerLayer = el("g", {}, svg);
   const runner = el("g", { style: "display:none" }, svg);
   el("circle", { r: 16, fill: "#E4002B", opacity: 0.25 }, runner);

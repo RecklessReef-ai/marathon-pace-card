@@ -160,7 +160,7 @@ export function computeSplits(state, ctx) {
   for (const s of ctx.splits) {
     const mile = s.mi != null ? s.mi : s.km / MI;
     rows.push({ kind: s.finish ? "finish" : "split", key: "split:" + s.label, label: s.label, short: s.label,
-      mile, where: s.where, side: s.side, latlon: latLonAt(ctx.route, mile) });
+      mile, where: s.where, side: s.side || sideFor(headingAt(ctx.route, mile)), latlon: latLonAt(ctx.route, mile) });
   }
   if (state.showHot) for (const h of ctx.hotspots) {
     rows.push({ kind: "hot", key: "hot:" + h.key, label: h.name, short: h.short, mile: h.mile, where: h.where,
@@ -174,17 +174,31 @@ export function computeSplits(state, ctx) {
   }
   for (const r of rows) { r.km = r.mile * MI; r.elapsedMin = r.mile * paceMin; r.clockMin = start + r.elapsedMin; }
   rows.sort((a, b) => (a.mile - b.mile) || (KIND_ORDER[a.kind] - KIND_ORDER[b.kind]));
-  return assignSides(rows);
+  return assignSides(rows, m => posAt(ctx.route, m));
 }
 
-// Two labels within 0.7 mile on the same side of the route would overlap; flip the later one.
+// Map labels are wide and short. Estimate each label's box from its side and text length,
+// and flip a label to the opposite side when its preferred box overlaps one already placed
+// (out-and-back streets run a block apart, so this happens a lot).
 const OPPOSITE = { l: "r", r: "l", t: "b", b: "t" };
-export function assignSides(rows, within = 0.7) {
+const LABEL_H = 26, CHAR_W = 11, GAP = 20;
+function labelBox(x, y, side, chars) {
+  const w = chars * CHAR_W;
+  if (side === "l") return { x0: x - GAP - w, x1: x - GAP, y0: y - LABEL_H / 2, y1: y + LABEL_H / 2 };
+  if (side === "r") return { x0: x + GAP, x1: x + GAP + w, y0: y - LABEL_H / 2, y1: y + LABEL_H / 2 };
+  if (side === "t") return { x0: x - w / 2, x1: x + w / 2, y0: y - 22 - LABEL_H, y1: y - 22 + 4 };
+  return { x0: x - w / 2, x1: x + w / 2, y0: y + 38 - LABEL_H, y1: y + 38 + 4 };
+}
+const overlaps = (a, b) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+export function assignSides(rows, posOf) {
   const placed = [];
   for (const r of rows) {
-    const clash = side => placed.some(p => p.side === side && Math.abs(p.mile - r.mile) < within);
-    if (clash(r.side) && !clash(OPPOSITE[r.side])) r.side = OPPOSITE[r.side];
-    placed.push({ mile: r.mile, side: r.side });
+    const [x, y] = posOf ? posOf(r.mile) : [r.mile * 1000, 0];
+    const chars = ((r.short || "") + " 00:00").length;
+    const box = side => labelBox(x, y, side, chars);
+    const free = side => !placed.some(p => overlaps(p, box(side)));
+    if (!free(r.side) && free(OPPOSITE[r.side])) r.side = OPPOSITE[r.side];
+    placed.push(box(r.side));
   }
   return rows;
 }

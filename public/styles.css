@@ -88,7 +88,8 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .maplabel { font-family: var(--cond); font-weight: 700; font-size: 25px;
   fill: var(--ink); paint-order: stroke; stroke: var(--land); stroke-width: 7px; stroke-linejoin: round; }
 .maplabel.hot { font-family: "Barlow", sans-serif; font-style: italic; font-weight: 600; font-size: 21px; fill: var(--muted); }
-.hood { font-family: "Barlow", sans-serif; font-style: italic; font-size: 19px; fill: var(--muted); opacity: 0.85; }
+.hood { font-family: "Barlow", sans-serif; font-style: italic; font-size: 16px; fill: var(--muted); opacity: 0.85; }
+.milenum { font-family: var(--cond); font-weight: 700; font-size: 13px; fill: var(--route); }
 .lake { font-family: "Barlow", sans-serif; font-style: italic; font-size: 24px; fill: var(--muted); }
 .mk { cursor: pointer; }
 .mk.sel .ring, .mk.sel .starp { stroke: var(--star); stroke-width: 5; }
