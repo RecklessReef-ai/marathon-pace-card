@@ -234,11 +234,32 @@ function render() {
   const sel = layers.markerLayer.querySelector(".sel"); if (sel) layers.markerLayer.appendChild(sel);
   layers.markerLayer.parentNode.appendChild(layers.runner);
   renderLegend();
+  renderSteps();
+}
+
+// ---------- the three steps ----------
+function renderSteps() {
+  const done = [!!state.name.trim(), state.spots.length > 0, !!state.shared];
+  let nowSet = false;
+  [...$("steps").children].forEach((li, i) => {
+    li.classList.toggle("done", done[i]);
+    const now = !done[i] && !nowSet; if (now) nowSet = true;
+    li.classList.toggle("now", now);
+    li.querySelector(".num").textContent = done[i] ? "✓" : String(i + 1);
+    li.querySelector("button").setAttribute("aria-label", (done[i] ? "Done: " : now ? "Next: " : "") + li.querySelector(".txt").textContent);
+  });
+}
+function goTo(what) {
+  const target = { runner: $("name"), spots: $("addSpot"), share: $("share") }[what];
+  const section = { runner: $("runner"), spots: $("spots").closest("section"), share: $("share").closest(".finish") }[what];
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => target.focus({ preventScroll: true }), 350);
 }
 
 // ---------- share ----------
 async function share() {
   const url = location.origin + location.pathname + "#" + encodeShare(state);
+  state.shared = true; save(); renderSteps();
   const btn = $("share");
   const done = msg => { const old = btn.textContent; btn.textContent = msg; setTimeout(() => { btn.textContent = old; }, 2000); };
   if (navigator.share) {
@@ -289,6 +310,7 @@ function boot() {
   $("units").addEventListener("change", readControls);
   $("addSpot").addEventListener("click", () => addSpot());
   $("share").addEventListener("click", share);
+  for (const b of $("steps").querySelectorAll("button")) b.addEventListener("click", () => goTo(b.dataset.go));
   if (/^https:\/\//.test(SUPPORT_URL)) { $("supportLink").href = SUPPORT_URL; $("support").hidden = false; }
   render();
   setInterval(render, 60000);

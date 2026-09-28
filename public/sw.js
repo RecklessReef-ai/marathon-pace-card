@@ -1,5 +1,5 @@
 // Offline shell for the pace card. Bump VERSION whenever anything in public/ changes.
-const VERSION = "2026-09-28.6";
+const VERSION = "2026-09-28.7";
 const CACHE = "pacecard-" + VERSION;
 const ASSETS = [
   "/", "/styles.css", "/app.js", "/map.js", "/pace.js", "/course-data.js", "/map-data.js", "/config.js", "/manifest.webmanifest",

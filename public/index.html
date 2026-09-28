@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Chicago Marathon Pace Card</title>
-<meta name="description" content="When your runner will be where at the 2026 Chicago Marathon, plus the best places to cheer. Add your own spots and share one link with your crew.">
+<meta name="description" content="Race-day planner for the friends and family of a Chicago Marathon runner. See when they will pass each spot, pick where to stand, and share one link with the whole crew.">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#41B6E6">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0E1A2C">
@@ -21,14 +21,22 @@
 <main>
   <header class="flag">
     <div class="stars" aria-hidden="true">✶ ✶ ✶ ✶</div>
-    <h1>Chicago Marathon pace card</h1>
-    <p>Sunday, October 11, 2026. When to be where, 5K by 5K.</p>
+    <h1>Cheer squad planner</h1>
+    <p class="what">For the friends and family of a Chicago Marathon runner. Know where to stand and when they'll run past. One link for the whole crew.</p>
+    <p class="when">Sunday, October 11, 2026</p>
   </header>
 
+  <ol class="steps" id="steps" aria-label="Three steps">
+    <li><button type="button" data-go="runner"><span class="num">1</span><span class="txt">Enter your runner's pace and wave</span></button></li>
+    <li><button type="button" data-go="spots"><span class="num">2</span><span class="txt">Add where each of you will stand</span></button></li>
+    <li><button type="button" data-go="share"><span class="num">3</span><span class="txt">Share the link with everyone</span></button></li>
+  </ol>
+
   <div class="top">
-    <section class="controls" aria-label="Runner details">
+    <section class="controls" aria-labelledby="runnerTitle" id="runner">
+      <h2 class="full" id="runnerTitle">1. Your runner</h2>
       <div class="full">
-        <label for="name">Runner</label>
+        <label for="name">Runner's name</label>
         <input id="name" type="text" placeholder="Their name" autocomplete="off" maxlength="40">
       </div>
       <div>
@@ -57,16 +65,16 @@
       </div>
       <div class="elapsed" id="finishElapsed"></div>
       <div class="share">
-        <button class="btn primary" id="share" type="button">Share this card</button>
-        <span class="hint">Sends everyone the same runner, times and spots.</span>
+        <button class="btn primary" id="share" type="button">Share the link</button>
+        <span class="hint">3. Everyone who opens it sees the same times and spots.</span>
       </div>
     </div>
   </div>
 
   <section class="spots-card" aria-labelledby="spotsTitle">
     <header>
-      <h2 id="spotsTitle">Your cheer spots</h2>
-      <p>Who is standing where. Pick a place along the course or type a mile.</p>
+      <h2 id="spotsTitle">2. Where you'll stand</h2>
+      <p>One spot per person or group. Pick a place along the course or type a mile.</p>
     </header>
     <div class="spots" id="spots"></div>
     <p class="empty" id="spotsEmpty">No spots yet. Add one, or tap a popular spot in the list and choose “Add as my spot”.</p>
@@ -79,6 +87,7 @@
       <div class="maplegend" id="legend"></div>
     </div>
     <div>
+      <h2 class="list-title">When they'll pass each spot</h2>
       <div class="toggles" role="group" aria-label="What to show">
         <label class="toggle units"><span>List by</span>
           <select id="units" aria-label="List by">

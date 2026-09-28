@@ -269,6 +269,7 @@ export function normalizeState(raw) {
     delay: Math.round(clamp(num(r.delay, DEFAULT_STATE.delay), 0, LIMITS.delayMax)),
     showHot: r.showHot === undefined ? DEFAULT_STATE.showHot : !!(r.showHot === true || r.showHot === "1" || r.showHot === 1),
     units: r.units === "mi" ? "mi" : "km",
+    shared: r.shared === true,
     spots: (Array.isArray(r.spots) ? r.spots : []).map(normalizeSpot).filter(Boolean).slice(0, LIMITS.maxSpots)
   };
 }

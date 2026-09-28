@@ -1,7 +1,7 @@
 {
   "name": "Chicago Marathon Pace Card",
   "short_name": "Pace Card",
-  "description": "When your runner will be where at the Chicago Marathon, and the best places to cheer.",
+  "description": "Race-day planner for the friends and family of a Chicago Marathon runner.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
