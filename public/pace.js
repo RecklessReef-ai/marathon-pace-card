@@ -4,7 +4,7 @@ import { MI, MAR_KM, SEGMENTS, WAVES, PALETTE } from "./course-data.js";
 const FIN_MI = MAR_KM / MI; // the Finish split, in miles
 
 export const DEFAULT_STATE = Object.freeze({
-  v: 1, name: "", paceSec: 660, wave: 3, delay: 10, showHot: true, spots: []
+  v: 1, name: "", paceSec: 660, wave: 3, delay: 10, showHot: true, units: "km", spots: []
 });
 export const LIMITS = Object.freeze({
   maxSpots: 12, whoLen: 40, noteLen: 80, paceMin: 240, paceMax: 1500, delayMax: 45, maxMile: 26.2
@@ -150,16 +150,29 @@ export function colorsFor(spots, palette = PALETTE) {
 }
 export const groupKey = who => (who || "").trim().toLowerCase();
 
+// The list by miles: start, every mile, halfway and the finish. Miles that are not a
+// multiple of five are `minor`: small numbered dots on the map, full rows in the list.
+export function mileSplits(kmSplits, segments = SEGMENTS) {
+  const start = kmSplits.find(s => s.label === "Start"), finish = kmSplits.find(s => s.finish);
+  const half = kmSplits.find(s => s.label === "Halfway");
+  const rows = [{ ...start, short: "Start" }];
+  for (let m = 1; m <= 26; m++) rows.push({ label: "Mile " + m, short: String(m), mi: m, where: whereAt(segments, m), minor: m % 5 !== 0 });
+  if (half) rows.push({ ...half, short: "Half" });
+  rows.push({ ...finish, short: "Finish" });
+  return rows;
+}
+
 // One time-ordered list of everything worth knowing the time for.
-// ctx: { route, splits, hotspots (resolved), segments, palette }
+// ctx: { route, splits, mileSplits, hotspots (resolved), segments, palette }
 export function computeSplits(state, ctx) {
   const paceMin = state.paceSec / 60;
   const start = startLineMinutes(state.wave, state.delay);
   const colors = colorsFor(state.spots, ctx.palette);
   const rows = [];
-  for (const s of ctx.splits) {
+  const splits = state.units === "mi" ? (ctx.mileSplits || mileSplits(ctx.splits, ctx.segments)) : ctx.splits;
+  for (const s of splits) {
     const mile = s.mi != null ? s.mi : s.km / MI;
-    rows.push({ kind: s.finish ? "finish" : "split", key: "split:" + s.label, label: s.label, short: s.label,
+    rows.push({ kind: s.finish ? "finish" : "split", key: "split:" + s.label, label: s.label, short: s.short || s.label, minor: !!s.minor,
       mile, where: s.where, side: s.side || sideFor(headingAt(ctx.route, mile)), latlon: latLonAt(ctx.route, mile) });
   }
   if (state.showHot) for (const h of ctx.hotspots) {
@@ -193,6 +206,7 @@ const overlaps = (a, b) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a
 export function assignSides(rows, posOf) {
   const placed = [];
   for (const r of rows) {
+    if (r.minor) continue;
     const [x, y] = posOf ? posOf(r.mile) : [r.mile * 1000, 0];
     const chars = ((r.short || "") + " 00:00").length;
     const box = side => labelBox(x, y, side, chars);
@@ -253,12 +267,13 @@ export function normalizeState(raw) {
     wave: WAVES.some(w => w.n === wave) ? wave : DEFAULT_STATE.wave,
     delay: Math.round(clamp(num(r.delay, DEFAULT_STATE.delay), 0, LIMITS.delayMax)),
     showHot: r.showHot === undefined ? DEFAULT_STATE.showHot : !!(r.showHot === true || r.showHot === "1" || r.showHot === 1),
+    units: r.units === "mi" ? "mi" : "km",
     spots: (Array.isArray(r.spots) ? r.spots : []).map(normalizeSpot).filter(Boolean).slice(0, LIMITS.maxSpots)
   };
 }
 
 // ---------- Share link (URL fragment) ----------
-// #v=1&n=Adem&p=660&w=3&d=10&h=1&s=3.1~Mom~by%20the%20bank&s=14~Dad
+// #v=1&n=Adem&p=660&w=3&d=10&h=1&u=mi&s=3.1~Mom~by%20the%20bank&s=14~Dad
 // `~` separates the fields of a spot, so `~` inside a name is encoded as %7E.
 
 const enc = s => encodeURIComponent(s).replace(/~/g, "%7E");
@@ -267,6 +282,7 @@ export function encodeShare(state) {
   const parts = ["v=1"];
   if (state.name) parts.push("n=" + enc(state.name));
   parts.push("p=" + state.paceSec, "w=" + state.wave, "d=" + state.delay, "h=" + (state.showHot ? 1 : 0));
+  if (state.units === "mi") parts.push("u=mi");
   for (const sp of state.spots) {
     let s = String(sp.mile) + "~" + enc(sp.who || "");
     if (sp.note) s += "~" + enc(sp.note);
@@ -293,6 +309,7 @@ export function decodeShare(hash) {
       case "w": out.wave = parseFloat(v); found = true; break;
       case "d": out.delay = parseFloat(v); found = true; break;
       case "h": out.showHot = v === "1"; found = true; break;
+      case "u": out.units = v; found = true; break;
       case "s": {
         const f = v.split("~");
         const mile = parseFloat(f[0]);

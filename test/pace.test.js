@@ -4,7 +4,7 @@ import { R, BOUNDS, SPLITS, SEGMENTS, HOTSPOTS, PALETTE, MI } from "../public/co
 import {
   projectRoute, posAt, latLonAt, nearestMile, headingAt, sideFor, whereAt, resolveHotspots,
   directionsUrl, fmtClock, fmtElapsed, fmtPacePerKm, computeSplits, finishFor, runnerMileAt,
-  colorsFor, normalizeState, encodeShare, decodeShare, assignSides
+  colorsFor, normalizeState, encodeShare, decodeShare, assignSides, mileSplits
 } from "../public/pace.js";
 
 const route = projectRoute(R, BOUNDS);
@@ -138,4 +138,23 @@ test("labels at the same mile go to opposite sides", () => {
   const both = computeSplits(st, ctx).filter(r => Math.abs(r.mile - zoneMile) < 0.01);
   assert.equal(both.length, 2);
   assert.notEqual(both[0].side, both[1].side);
+});
+
+test("listing by miles gives start, 26 miles, halfway and finish, in order, with streets", () => {
+  const st = normalizeState({ ...base, units: "mi", spots: [{ id: "a1", who: "Mom", mile: 14.5 }] });
+  const rows = computeSplits({ ...st, showHot: false }, ctx);
+  const official = rows.filter(r => r.kind !== "spot");
+  assert.equal(official.length, 29);
+  assert.equal(official[0].label, "Start");
+  assert.equal(official[official.length - 1].kind, "finish");
+  const m14 = rows.find(r => r.label === "Mile 14");
+  assert.ok(m14.minor && m14.where.includes("Adams"), JSON.stringify(m14));
+  assert.ok(!rows.find(r => r.label === "Mile 15").minor);
+  for (let i = 1; i < rows.length; i++) assert.ok(rows[i].mile >= rows[i - 1].mile);
+  assert.equal(mileSplits(SPLITS).length, 29);
+  // share link carries the choice, and junk falls back to km
+  assert.match(encodeShare(st), /&u=mi/);
+  assert.equal(normalizeState(decodeShare("#" + encodeShare(st))).units, "mi");
+  assert.equal(normalizeState(decodeShare("#v=1&u=furlongs")).units, "km");
+  assert.equal(normalizeState(base).units, "km");
 });

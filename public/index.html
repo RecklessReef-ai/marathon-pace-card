@@ -80,6 +80,12 @@
     </div>
     <div>
       <div class="toggles" role="group" aria-label="What to show">
+        <label class="toggle">List by
+          <select id="units" aria-label="List by">
+            <option value="km">5K splits</option>
+            <option value="mi">Every mile</option>
+          </select>
+        </label>
         <label class="toggle"><input type="checkbox" id="showHot" checked> Show popular spots</label>
       </div>
       <ol class="course" id="course"></ol>

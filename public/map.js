@@ -50,7 +50,7 @@ export function buildMap(svg, route) {
   const runner = el("g", { style: "display:none" }, svg);
   el("circle", { r: 16, fill: "#E4002B", opacity: 0.25 }, runner);
   el("circle", { r: 8, fill: "#E4002B", stroke: "#fff", "stroke-width": 3 }, runner);
-  return { markerLayer, runner };
+  return { markerLayer, runner, mileLayer };
 }
 
 // One marker for a row from computeSplits. `timeText` is the short clock or "".
@@ -63,6 +63,17 @@ export function drawMarker(layer, route, row, opts) {
     tabindex: "0", role: "button",
     "aria-label": row.label + (timeText ? ", " + timeText : "")
   }, layer);
+  if (row.minor) {
+    el("circle", { class: "ring", r: 10, fill: "var(--paper)", stroke: "var(--route)", "stroke-width": 2 }, g);
+    const n = el("text", { class: "milenum", y: 4.5, "text-anchor": "middle" }, g);
+    n.textContent = row.short;
+    if (selected && timeText) {
+      const off = LABEL_OFFSET[row.side] || LABEL_OFFSET.r;
+      const t = el("text", { class: "maplabel", x: off[0], y: off[1], "text-anchor": off[2] }, g);
+      t.textContent = row.label + " " + timeText;
+    }
+    return g;
+  }
   if (row.kind === "spot") {
     el("path", { class: "starp", d: STAR, fill: row.color, stroke: "#fff", "stroke-width": 2.5 }, g);
   } else if (row.kind === "hot") {

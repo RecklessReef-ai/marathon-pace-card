@@ -70,12 +70,13 @@ function fillControls() {
   $("wave").value = String(state.wave);
   $("delay").value = state.delay;
   $("showHot").checked = state.showHot;
+  $("units").value = state.units;
 }
 function readControls() {
   const pm = parseFloat($("pmin").value), ps = parseFloat($("psec").value);
   const paceSec = (Number.isFinite(pm) ? pm : 0) * 60 + (Number.isFinite(ps) ? ps : 0);
   state = normalizeState({ ...state, name: $("name").value, paceSec: paceSec || DEFAULT_STATE.paceSec,
-    wave: parseInt($("wave").value, 10), delay: $("delay").value, showHot: $("showHot").checked });
+    wave: parseInt($("wave").value, 10), delay: $("delay").value, showHot: $("showHot").checked, units: $("units").value });
   save(); render();
 }
 
@@ -165,7 +166,7 @@ function renderLegend() {
   const legend = $("legend");
   legend.replaceChildren();
   const item = (svg, text) => legend.append(h("span", {}, svg, document.createTextNode(text)));
-  item(iconSvg("split"), "5K splits");
+  item(iconSvg("split"), state.units === "mi" ? "Mile markers" : "5K splits");
   if (state.showHot) item(iconSvg("hot"), "Popular spot");
   for (const [k, color] of colorsFor(state.spots, PALETTE)) {
     const who = state.spots.find(s => groupKey(s.who) === k)?.who.trim() || "Cheer spot";
@@ -193,6 +194,7 @@ function render() {
   } else layers.runner.style.display = "none";
 
   const rows = computeSplits(state, ctx);
+  layers.mileLayer.style.display = state.units === "mi" ? "none" : "";
   layers.markerLayer.replaceChildren();
   const list = $("course"); list.replaceChildren();
   let nextFound = false;
@@ -284,6 +286,7 @@ function boot() {
   buildSpotsEditor();
   for (const id of ["name", "pmin", "psec", "wave", "delay"]) $(id).addEventListener("input", readControls);
   $("showHot").addEventListener("change", readControls);
+  $("units").addEventListener("change", readControls);
   $("addSpot").addEventListener("click", () => addSpot());
   $("share").addEventListener("click", share);
   if (/^https:\/\//.test(SUPPORT_URL)) { $("supportLink").href = SUPPORT_URL; $("support").hidden = false; }
