@@ -1,5 +1,5 @@
 // Offline shell for the pace card. Bump VERSION whenever anything in public/ changes.
-const VERSION = "2026-09-28.8";
+const VERSION = "2026-09-28.9";
 const CACHE = "pacecard-" + VERSION;
 const ASSETS = [
   "/", "/styles.css", "/app.js", "/map.js", "/pace.js", "/course-data.js", "/map-data.js", "/config.js", "/manifest.webmanifest",
@@ -33,7 +33,8 @@ function withTimeout(promise, ms) {
 
 self.addEventListener("fetch", event => {
   const req = event.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== "GET" || url.origin !== self.location.origin || url.pathname.startsWith("/_vercel/")) return;
   if (req.mode === "navigate") {
     // Network first so updates land, cached shell when the crowd eats the signal.
     event.respondWith(
