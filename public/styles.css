@@ -113,10 +113,10 @@ ol.course::before { content: ""; position: absolute; left: 13px; top: 8px; botto
 .row .time { font-family: var(--cond); font-weight: 700; font-size: 1.5rem; text-align: right; line-height: 1.1; }
 .row .where { color: var(--muted); font-size: 0.92rem; }
 .row .el { color: var(--muted); font-size: 0.92rem; text-align: right; }
-.row.spot, .row.hot { background: var(--wash); margin: 4px 0; }
-.row.spot .name { font-family: "Barlow", sans-serif; font-weight: 600; font-size: 1.05rem; }
-.row.hot .name { font-family: "Barlow", sans-serif; font-weight: 600; font-style: italic; font-size: 1.05rem; }
-.row.hot { border-left: 5px solid var(--sky); }
+.row.k-spot, .row.k-hot { background: var(--wash); margin: 4px 0; }
+.row.k-spot .name { font-family: "Barlow", sans-serif; font-weight: 600; font-size: 1.05rem; }
+.row.k-hot .name { font-family: "Barlow", sans-serif; font-weight: 600; font-style: italic; font-size: 1.05rem; }
+.row.k-hot { border-left: 5px solid var(--sky); }
 .row.sel { outline: 3px solid var(--star); outline-offset: -3px; }
 .row.passed { opacity: 0.45; }
 .row.next .name::after { content: "  Up next"; color: var(--star); font-family: "Barlow", sans-serif; font-size: 0.85rem; font-weight: 600; }
@@ -125,5 +125,8 @@ ol.course::before { content: ""; position: absolute; left: 13px; top: 8px; botto
 .row .detail .transit { color: var(--muted); font-size: 0.9rem; }
 .row .detail .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
+.support { margin: 26px 0 0; padding: 14px 16px; border: 2px solid var(--line); border-radius: 12px; background: var(--wash);
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.95rem; }
+.support[hidden] { display: none; }
 .foot { margin-top: 22px; font-size: 0.85rem; color: var(--muted); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

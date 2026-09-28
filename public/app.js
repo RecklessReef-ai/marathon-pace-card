@@ -6,6 +6,7 @@ import {
   normalizeState, normalizeSpot, newId, encodeShare, decodeShare, DEFAULT_STATE, LIMITS
 } from "./pace.js";
 import { buildMap, drawMarker } from "./map.js";
+import { SUPPORT_URL } from "./config.js";
 
 const STORAGE = "paceCard.v2";
 const $ = id => document.getElementById(id);
@@ -204,7 +205,7 @@ function render() {
     g.addEventListener("click", () => select(row.key));
     g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(row.key); } });
 
-    const li = h("li", { class: ["row", row.kind, phase, selected ? "sel" : ""].filter(Boolean).join(" "), tabindex: "0", "aria-expanded": String(selected) },
+    const li = h("li", { class: ["row", "k-" + row.kind, phase, selected ? "sel" : ""].filter(Boolean).join(" "), tabindex: "0", "aria-expanded": String(selected) },
       h("span", { class: "mark" }, iconSvg(row.kind, row.color)),
       h("span", { class: "name", text: row.label }),
       h("span", { class: "time", text: ok ? fmtClock(row.clockMin) : "–" }),
@@ -285,6 +286,7 @@ function boot() {
   $("showHot").addEventListener("change", readControls);
   $("addSpot").addEventListener("click", () => addSpot());
   $("share").addEventListener("click", share);
+  if (/^https:\/\//.test(SUPPORT_URL)) { $("supportLink").href = SUPPORT_URL; $("support").hidden = false; }
   render();
   setInterval(render, 60000);
   registerSW();
