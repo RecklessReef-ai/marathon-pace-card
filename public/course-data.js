@@ -100,7 +100,7 @@ export const SEGMENTS = [
 // Popular places to watch. `mile` is derived from lat/lon at load so the marker
 // sits on the drawn route. `expectMile` is what the tests check that against.
 export const HOTSPOTS = [
-  { key: "northalsted", name: "Mile 8: Northalsted (Boystown)", short: "Northalsted",
+  { key: "northalsted", name: "Mile 8: Northalsted", short: "Northalsted",
     lat: 41.9434, lon: -87.6448, where: "Broadway near Roscoe St.", side: "l", expectMile: 8.6,
     blurb: "A high-energy stretch with loud music, big crowds and street-side viewing.",
     transit: "Red Line, Belmont or Addison" },
