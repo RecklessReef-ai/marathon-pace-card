@@ -1,0 +1,12 @@
+{
+  "name": "marathon-pace-card",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Chicago Marathon pace card for spectators: when your runner will be where, plus where to stand.",
+  "scripts": {
+    "test": "node --test",
+    "dev": "python3 -m http.server 8123 --directory public"
+  },
+  "license": "MIT"
+}
