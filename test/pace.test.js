@@ -103,6 +103,15 @@ test("decodeShare tolerates junk and normalizeState clamps", () => {
   assert.match(whereAt(SEGMENTS, 26.2), /Grant Park/);
 });
 
+test("the southbound Loop leg runs down Dearborn St., not State St. (2026 course)", () => {
+  const [, lon] = latLonAt(route, 1.6);
+  assert.ok(lon < -87.6285, "mile 1.6 should be west of State St., lon " + lon);
+  assert.match(whereAt(SEGMENTS, 1.6), /^Dearborn St\./);
+  assert.match(whereAt(SEGMENTS, 5 / MI), /^LaSalle St\./); // the 5K split still reads LaSalle
+  for (let i = 1; i < R.length; i++) assert.ok(R[i][2] > R[i - 1][2], "miles climb at R[" + i + "]");
+  assert.equal(R[R.length - 1][2], 26.2188);
+});
+
 test("latLonAt returns waypoints exactly and interpolates between them", () => {
   assert.deepEqual(latLonAt(route, R[40][2]), [R[40][0], R[40][1]]);
   assert.deepEqual(latLonAt(route, 0), [R[0][0], R[0][1]]);

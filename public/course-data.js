@@ -13,14 +13,17 @@ export const WAVES = [
   { n: 3, start: "8:35", label: "Wave 3, 8:35 a.m." }
 ];
 
-// Course waypoints [lat, lon, mile]. From the official 2025 course GPS track (the 2026
-// printed map shows the same streets), lightly simplified; miles are the track distance
-// scaled so the finish lands on 26.2188.
+// Course waypoints [lat, lon, mile]. From the official 2025 course GPS track, lightly
+// simplified; miles are the track distance scaled so the finish lands on 26.2188.
+// One correction for 2026: the southbound Loop leg between Grand Ave. and Jackson Blvd.
+// (R[8]..R[13]) moved from State St. to Dearborn St., per the official 2026 printed map.
+// Those points sit on the OpenStreetMap centreline of Dearborn; their miles were
+// recomputed along the new path so R[14] onward is untouched.
 export const R = [
   [41.8809,-87.62068,0.0],[41.88176,-87.62061,0.058],[41.88189,-87.62052,0.068],[41.88206,-87.6205,0.08],
   [41.88772,-87.62059,0.465],[41.89,-87.62024,0.622],[41.891,-87.62019,0.69],[41.89178,-87.62023,0.743],
-  [41.89166,-87.62807,1.141],[41.88943,-87.62801,1.293],[41.88912,-87.6281,1.314],[41.88693,-87.62809,1.464],
-  [41.88332,-87.62797,1.709],[41.87821,-87.62769,2.058],[41.87816,-87.63226,2.289],[41.89563,-87.63263,3.479],
+  [41.89164,-87.62964,1.22],[41.88943,-87.62958,1.371],[41.88912,-87.62968,1.393],[41.88693,-87.62953,1.542],
+  [41.88332,-87.62952,1.788],[41.87818,-87.62929,2.138],[41.87816,-87.63226,2.289],[41.89563,-87.63263,3.479],
   [41.90632,-87.63299,4.207],[41.91276,-87.6331,4.646],[41.91317,-87.63248,4.688],[41.9133,-87.6318,4.724],
   [41.9141,-87.63175,4.778],[41.91452,-87.63209,4.812],[41.915,-87.63262,4.854],[41.91563,-87.6329,4.899],
   [41.91673,-87.6339,4.99],[41.91727,-87.63416,5.029],[41.91882,-87.63451,5.136],[41.91911,-87.63467,5.157],
@@ -66,9 +69,9 @@ export const SPLITS = [
 // (last row includes the finish). `at` is the mile the landmark picker offers.
 export const SEGMENTS = [
   { from: 0.0,  to: 0.74, at: 0.3,  street: "Columbus Dr.",                     hood: "Grant Park (start)" },
-  { from: 0.74, to: 1.14, at: 0.9,  street: "Grand Ave.",                       hood: "Streeterville / River North" },
-  { from: 1.14, to: 2.06, at: 1.6,  street: "State St.",                        hood: "River North / the Loop" },
-  { from: 2.06, to: 2.29, at: 2.2,  street: "Jackson Blvd.",                    hood: "the Loop" },
+  { from: 0.74, to: 1.22, at: 0.9,  street: "Grand Ave.",                       hood: "Streeterville / River North" },
+  { from: 1.22, to: 2.14, at: 1.6,  street: "Dearborn St.",                     hood: "River North / the Loop" },
+  { from: 2.14, to: 2.29, at: 2.2,  street: "Jackson Blvd.",                    hood: "the Loop" },
   { from: 2.29, to: 3.6,  at: 3.0,  street: "LaSalle St.",                      hood: "the Loop / River North" },
   { from: 3.6,  to: 4.72, at: 4.2,  street: "LaSalle Dr.",                      hood: "Old Town / Lincoln Park" },
   { from: 4.72, to: 5.7,  at: 5.2,  street: "Stockton Dr.",                     hood: "Lincoln Park" },
