@@ -268,15 +268,18 @@ function goTo(what) {
 // ---------- share ----------
 async function share() {
   const url = location.origin + location.pathname + "#" + encodeShare(state);
-  state.shared = true; state.fromLink = false; state.stale = false; save(); renderSteps();
+  // Only a share that actually went out ticks step 3 and clears the opened-from-link notice.
+  // Cancelling the share sheet leaves everything as it was.
+  const sent = () => { state.shared = true; state.fromLink = false; state.stale = false; save(); renderSteps(); };
   const btn = $("share");
   const done = msg => { const old = btn.textContent; btn.textContent = msg; setTimeout(() => { btn.textContent = old; }, 2000); };
   if (navigator.share) {
-    try { await navigator.share({ title: "Chicago Marathon pace card", text: (state.name ? `Pace card for ${state.name}. ` : "Pace card. ") + "Add your spot, then share the link back.", url }); return; }
+    try { await navigator.share({ title: "Chicago Marathon pace card", text: (state.name ? `Pace card for ${state.name}. ` : "Pace card. ") + "Add your spot, then share the link back.", url }); sent(); return; }
     catch (e) { if (e && e.name === "AbortError") return; }
   }
-  try { await navigator.clipboard.writeText(url); done("Link copied"); return; } catch { /* fall through */ }
+  try { await navigator.clipboard.writeText(url); sent(); done("Link copied"); return; } catch { /* fall through */ }
   window.prompt("Copy this link", url);
+  sent();
 }
 
 // ---------- offline ----------

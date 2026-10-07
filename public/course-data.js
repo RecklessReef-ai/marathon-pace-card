@@ -16,7 +16,8 @@ export const WAVES = [
 // Course waypoints [lat, lon, mile]. From the official 2025 course GPS track, lightly
 // simplified; miles are the track distance scaled so the finish lands on 26.2188.
 // One correction for 2026: the southbound Loop leg between Grand Ave. and Jackson Blvd.
-// (R[8]..R[13]) moved from State St. to Dearborn St., per the official 2026 printed map.
+// (R[8]..R[13]) moved from State St. to Dearborn St., per the official 2026 Bank of America
+// Chicago Marathon course map (PDF dated August 18 2026, chicagomarathon.com).
 // Those points sit on the OpenStreetMap centreline of Dearborn; their miles were
 // recomputed along the new path so R[14] onward is untouched.
 export const R = [
