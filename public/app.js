@@ -116,7 +116,7 @@ function spotCard(sp) {
     links.replaceChildren(directionsLinks(latLonAt(route, sp.mile), true));
     card.style.borderLeftColor = colorsFor(state.spots, PALETTE).get(groupKey(sp.who)) || "var(--sky)";
   };
-  const commit = () => { Object.assign(sp, normalizeSpot(sp)); save(); refresh(); render(); };
+  const commit = () => { Object.assign(sp, normalizeSpot(sp)); spotsChanged(); save(); refresh(); render(); };
 
   who.addEventListener("input", () => { sp.who = who.value; commit(); refreshCardColors(); });
   note.addEventListener("input", () => { sp.note = note.value; commit(); });
@@ -126,10 +126,16 @@ function spotCard(sp) {
   remove.addEventListener("click", () => {
     state.spots = state.spots.filter(s => s.id !== sp.id);
     if (selectedKey === "spot:" + sp.id) selectedKey = null;
-    card.remove(); save(); refreshCardColors(); render(); updateEmpty();
+    card.remove(); spotsChanged(); save(); refreshCardColors(); render(); updateEmpty();
   });
   refresh();
   return card;
+}
+// A shared link is a copy. Once the spots change, the link that went out (or came in) is out of date,
+// so step 3 is unticked and the Share button asks for the updated link to go round again.
+function spotsChanged() {
+  if (state.shared || state.fromLink) state.stale = true;
+  state.shared = false;
 }
 function refreshCardColors() {
   const colors = colorsFor(state.spots, PALETTE);
@@ -152,6 +158,7 @@ function addSpot(preset) {
   const nextSeg = last ? SEGMENTS.find(s => s.at > last.mile) : SEGMENTS[3];
   const sp = normalizeSpot({ id: newId(), who: preset?.who ?? (last ? last.who : ""), mile: preset?.mile ?? (nextSeg ? nextSeg.at : 0), note: preset?.note ?? "" });
   state.spots.push(sp);
+  spotsChanged();
   const card = spotCard(sp);
   $("spots").append(card);
   updateEmpty(); save(); render();
@@ -248,6 +255,8 @@ function renderSteps() {
     li.querySelector(".num").textContent = done[i] ? "✓" : String(i + 1);
     li.querySelector("button").setAttribute("aria-label", (done[i] ? "Done: " : now ? "Next: " : "") + li.querySelector(".txt").textContent);
   });
+  $("fromLink").hidden = !state.fromLink;
+  $("share").textContent = state.stale ? "Share the updated link" : "Share the link";
 }
 function goTo(what) {
   const target = { runner: $("name"), spots: $("addSpot"), share: $("share") }[what];
@@ -259,11 +268,11 @@ function goTo(what) {
 // ---------- share ----------
 async function share() {
   const url = location.origin + location.pathname + "#" + encodeShare(state);
-  state.shared = true; save(); renderSteps();
+  state.shared = true; state.fromLink = false; state.stale = false; save(); renderSteps();
   const btn = $("share");
   const done = msg => { const old = btn.textContent; btn.textContent = msg; setTimeout(() => { btn.textContent = old; }, 2000); };
   if (navigator.share) {
-    try { await navigator.share({ title: "Chicago Marathon pace card", text: state.name ? `Pace card for ${state.name}` : "Pace card", url }); return; }
+    try { await navigator.share({ title: "Chicago Marathon pace card", text: (state.name ? `Pace card for ${state.name}. ` : "Pace card. ") + "Add your spot, then share the link back.", url }); return; }
     catch (e) { if (e && e.name === "AbortError") return; }
   }
   try { await navigator.clipboard.writeText(url); done("Link copied"); return; } catch { /* fall through */ }
@@ -285,11 +294,12 @@ function registerSW() {
 
 // ---------- boot ----------
 // A share link in the hash wins over what this phone remembered. Strip it once applied,
-// so later edits are not clobbered on the next reload.
+// so later edits are not clobbered on the next reload. The card is flagged as opened from
+// a link until this phone shares it on, so the notice stays through reloads.
 function applyHash() {
   const shared = decodeShare(location.hash);
   if (!shared) return false;
-  state = normalizeState(shared); save();
+  state = normalizeState(shared); state.fromLink = true; save();
   history.replaceState(null, "", location.pathname + location.search);
   return true;
 }

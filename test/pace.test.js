@@ -77,6 +77,19 @@ test("share link round-trips awkward names and stays short", () => {
   assert.deepEqual(strip(back), strip(st));
 });
 
+test("opened-from-link and out-of-date flags survive a reload but never ride in the share link", () => {
+  const st = normalizeState({ ...base, fromLink: true, stale: true, shared: true });
+  assert.equal(st.fromLink, true);
+  assert.equal(st.stale, true);
+  assert.equal(st.shared, true);
+  const hash = encodeShare(st);
+  assert.ok(!/fromLink|stale|shared/.test(hash), hash);
+  const back = normalizeState(decodeShare("#" + hash));
+  assert.equal(back.fromLink, false);
+  assert.equal(back.stale, false);
+  assert.equal(back.shared, false);
+});
+
 test("decodeShare tolerates junk and normalizeState clamps", () => {
   assert.equal(decodeShare(""), null);
   assert.equal(decodeShare("#utm_source=x"), null);
