@@ -77,6 +77,19 @@ test("share link round-trips awkward names and stays short", () => {
   assert.deepEqual(strip(back), strip(st));
 });
 
+test("opened-from-link and out-of-date flags survive a reload but never ride in the share link", () => {
+  const st = normalizeState({ ...base, fromLink: true, stale: true, shared: true });
+  assert.equal(st.fromLink, true);
+  assert.equal(st.stale, true);
+  assert.equal(st.shared, true);
+  const hash = encodeShare(st);
+  assert.ok(!/fromLink|stale|shared/.test(hash), hash);
+  const back = normalizeState(decodeShare("#" + hash));
+  assert.equal(back.fromLink, false);
+  assert.equal(back.stale, false);
+  assert.equal(back.shared, false);
+});
+
 test("decodeShare tolerates junk and normalizeState clamps", () => {
   assert.equal(decodeShare(""), null);
   assert.equal(decodeShare("#utm_source=x"), null);
@@ -88,6 +101,15 @@ test("decodeShare tolerates junk and normalizeState clamps", () => {
   assert.equal(st.spots[1].who, "Ok");
   assert.equal(whereAt(SEGMENTS, 3.1), "LaSalle St., the Loop / River North");
   assert.match(whereAt(SEGMENTS, 26.2), /Grant Park/);
+});
+
+test("the southbound Loop leg runs down Dearborn St., not State St. (2026 course)", () => {
+  const [, lon] = latLonAt(route, 1.6);
+  assert.ok(lon < -87.6285, "mile 1.6 should be west of State St., lon " + lon);
+  assert.match(whereAt(SEGMENTS, 1.6), /^Dearborn St\./);
+  assert.match(whereAt(SEGMENTS, 5 / MI), /^LaSalle St\./); // the 5K split still reads LaSalle
+  for (let i = 1; i < R.length; i++) assert.ok(R[i][2] > R[i - 1][2], "miles climb at R[" + i + "]");
+  assert.equal(R[R.length - 1][2], 26.2188);
 });
 
 test("latLonAt returns waypoints exactly and interpolates between them", () => {

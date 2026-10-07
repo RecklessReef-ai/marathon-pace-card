@@ -71,6 +71,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .finish .elapsed { font-size: 0.95rem; text-align: right; }
 .finish .share { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
 .finish .share .hint { color: inherit; opacity: 0.8; margin: 0; }
+.finish .from-link { grid-column: 1 / -1; color: inherit; opacity: 0.9; margin: 0; padding-left: 10px; border-left: 3px solid var(--sky); }
 
 .btn { font: inherit; font-weight: 600; font-size: 0.95rem; color: var(--ink); background: var(--wash);
   border: 2px solid var(--sky); border-radius: 999px; padding: 8px 14px; min-height: 40px; cursor: pointer;

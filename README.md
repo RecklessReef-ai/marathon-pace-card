@@ -12,9 +12,11 @@ Live: see the Vercel project `marathon-pace-card`.
 - Plain static files in `public/`. No framework, no build step, no runtime dependencies.
 - `public/pace.js` holds all the math (pure functions, tested). `public/course-data.js` holds
   everything Chicago-specific: route, splits, neighbourhoods, popular zones.
-- The map: the route is the official course GPS track (GoAndRace export of the 2025 course, which the
-  2026 printed map matches street for street), lightly simplified, with miles scaled to 26.2188 along
-  the track. Lake, river and parks are OpenStreetMap data (© OpenStreetMap contributors, ODbL), pulled
+- The map: the route is the official course GPS track (GoAndRace export of the 2025 course), lightly
+  simplified, with miles scaled to 26.2188 along the track. One leg differs in 2026: the southbound
+  Loop leg between Grand Ave. and Jackson Blvd. was corrected from State St. to Dearborn St., from the
+  official 2026 Bank of America Chicago Marathon course map (PDF dated August 18 2026,
+  chicagomarathon.com). Lake, river and parks are OpenStreetMap data (© OpenStreetMap contributors, ODbL), pulled
   with Overpass and simplified by `scripts/build-map-data.py`, which writes `public/map-data.js`.
   Positions are good to about a block.
 - Times assume an even pace. On race day the official Chicago Marathon app has live tracking.
